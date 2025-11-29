@@ -1,0 +1,78 @@
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #ffffff;
+  background-color: #000000;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dashboard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 40px;
+  box-sizing: border-box;
+  pointer-events: none; /* Let clicks pass through to carousel if needed */
+}
+
+.widget-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  pointer-events: auto;
+}
+
+.time-display {
+  text-align: right;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.time-display h1 {
+  font-size: 4em;
+  margin: 0 0 10px 0; /* Add bottom margin */
+  line-height: 1; /* Fix overlap */
+}
+
+.time-display h2 {
+  font-size: 2em;
+  margin: 0 0 5px 0; /* Add bottom margin */
+  font-weight: normal;
+  line-height: 1.2; /* Fix overlap */
+}
+
+.time-display h3 {
+  font-size: 1.5em;
+  margin: 0;
+  font-weight: normal;
+  opacity: 0.8;
+  line-height: 1.2; /* Fix overlap */
+}
+
