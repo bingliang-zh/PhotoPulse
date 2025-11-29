@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const images = [
-  'https://picsum.photos/id/1018/1920/1080',
-  'https://picsum.photos/id/1015/1920/1080',
-  'https://picsum.photos/id/1019/1920/1080',
-  'https://picsum.photos/id/1016/1920/1080',
-];
+const imagesGlob = import.meta.glob('../assets/backgrounds/*', { eager: true, query: '?url', import: 'default' });
+const images = Object.values(imagesGlob) as string[];
 
 export const Carousel = () => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+    // Preload images to avoid black screen during transition
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length);
     }, 15000);
@@ -27,7 +29,7 @@ export const Carousel = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 2 }}
           style={{
             position: 'absolute',
             width: '100%',
