@@ -1,8 +1,12 @@
-# 🖼️ Album
+# ![PhotoPulse Icon](logo.png) PhotoPulse
 
 ![Preview](./preview.png)
 
-Album is a lightweight digital photo frame and dashboard built with **Tauri v2**. It turns your screen into a living display that cycles through your favorite memories while keeping you updated with real-time stock and weather data.
+**Breathe new life into your idle devices.** 
+
+PhotoPulse is a lightweight, cross-platform application designed to transform your unused laptops, tablets (like Microsoft Surface), or secondary monitors into a premium **Smart Digital Photo Frame**. It seamlessly blends your personal photo collection with a real-time information dashboard including weather forecasts, tracked stock prices, and crypto market trends.
+
+---
 
 ## ✨ Features
 
@@ -14,27 +18,27 @@ Album is a lightweight digital photo frame and dashboard built with **Tauri v2**
 
 ###  macOS
 1.  **Download**: Get the latest `.dmg` or `.app` from the [Releases](#).
-2.  **Install**: Drag `Album` to your `Applications` folder.
+2.  **Install**: Drag `PhotoPulse` to your `Applications` folder.
 3.  **Permissions**: On the first launch, **right-click** the app and select **Open** to bypass macOS Gatekeeper.
 4.  **Setup**: Press **`** (backtick) to open the Debug Panel, click **"Open Backgrounds"** to add your photos, and **"Open Config Folder"** to edit your settings.
 
 ### 🪟 Windows
 1.  **Download**: Get the `.msi` or `.exe` installer.
 2.  **Install**: Run the installer and follow the prompts.
-3.  **Setup**: Launch the app and use the **`** shortcut to access folders via the Debug Panel. Configuration and background images are stored in your user's `AppData/Roaming/com.bingliang.album` folder.
+3.  **Setup**: Launch the app and use the **`** shortcut to access folders via the Debug Panel. Configuration and background images are stored in your user's `AppData/Roaming/com.bingliang.photopulse` folder.
 
 ### 🐧 Ubuntu (Kiosk Mode)
 1.  **Install App**: Download the `.deb` package and install it:
     ```bash
-    sudo dpkg -i album_0.1.0_amd64.deb
+    sudo dpkg -i photopulse_0.1.0_amd64.deb
     # If there are missing dependencies, run:
     sudo apt --fix-broken install -y
     ```
-2.  **Auto-start**: To launch automatically on login, create `~/.config/autostart/album.desktop`:
+2.  **Auto-start**: To launch automatically on login, create `~/.config/autostart/photopulse.desktop`:
     ```ini
     [Desktop Entry]
     Type=Application
-    Name=Album
+    Name=PhotoPulse
     Exec=tauri-app
     X-GNOME-Autostart-enabled=true
     ```
