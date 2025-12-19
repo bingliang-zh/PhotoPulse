@@ -46,7 +46,7 @@ export const CryptoWidget = ({ symbols, onLog }: CryptoProps) => {
 
     return (
         <WidgetContainer title="Crypto">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            <div className="widget-grid">
                 {activeSymbols.map(fullSymbol => {
                     const symbol = fullSymbol.split('-')[0];
                     const price = prices[symbol];

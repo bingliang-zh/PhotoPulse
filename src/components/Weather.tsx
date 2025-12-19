@@ -106,14 +106,14 @@ export const Weather = ({ location, onLog }: WeatherProps) => {
 
   return (
     <WidgetContainer title={displayCity}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <p style={{ fontSize: '3em', margin: 0 }}>{current.temperature_2m}°C</p>
+      <div className="weather-main">
+        <p className="weather-temp">{current.temperature_2m}°C</p>
         <div>
           <p style={{ margin: 0, opacity: 0.8 }}>High: {daily.temperature_2m_max[0]}°C</p>
           <p style={{ margin: 0, opacity: 0.8 }}>Low: {daily.temperature_2m_min[0]}°C</p>
         </div>
       </div>
-      <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.9em', opacity: 0.9 }}>
+      <div className="weather-info">
         <div style={{ display: 'flex', gap: '20px' }}>
           <span>🌅 {sunrise}</span>
           <span>🌇 {sunset}</span>

@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -39,7 +43,8 @@ body {
   align-items: flex-start;
   padding: 40px;
   box-sizing: border-box;
-  pointer-events: none; /* Let clicks pass through to carousel if needed */
+  pointer-events: none;
+  /* Let clicks pass through to carousel if needed */
 }
 
 .widget-column {
@@ -47,25 +52,116 @@ body {
   flex-direction: column;
   gap: 20px;
   pointer-events: auto;
+  max-width: 100%;
+}
+
+.widget-container {
+  color: white;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.widget-title {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  opacity: 0.9;
+}
+
+.widget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.weather-temp {
+  font-size: 3em;
+  margin: 0;
+}
+
+.weather-info {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+@media (max-height: 600px) {
+  .dashboard {
+    padding: 20px;
+  }
+
+  .widget-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: fit-content;
+    max-width: 700px;
+  }
+
+  .widget-container {
+    padding: 15px;
+    width: 100%;
+  }
+
+  /* Weather spans both columns */
+  .widget-container:first-child {
+    grid-column: span 2;
+  }
+
+  .widget-title {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+  }
+
+  .widget-grid {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  .weather-temp {
+    font-size: 2em;
+  }
+
+  .weather-info {
+    margin-top: 5px;
+    flex-direction: row;
+    gap: 15px;
+  }
 }
 
 .time-display {
   text-align: right;
   color: white;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .time-display h1 {
   font-size: 4em;
-  margin: 0 0 10px 0; /* Add bottom margin */
-  line-height: 1; /* Fix overlap */
+  margin: 0 0 10px 0;
+  /* Add bottom margin */
+  line-height: 1;
+  /* Fix overlap */
 }
 
 .time-display h2 {
   font-size: 2em;
-  margin: 0 0 5px 0; /* Add bottom margin */
+  margin: 0 0 5px 0;
+  /* Add bottom margin */
   font-weight: normal;
-  line-height: 1.2; /* Fix overlap */
+  line-height: 1.2;
+  /* Fix overlap */
 }
 
 .time-display h3 {
@@ -73,7 +169,8 @@ body {
   margin: 0;
   font-weight: normal;
   opacity: 0.8;
-  line-height: 1.2; /* Fix overlap */
+  line-height: 1.2;
+  /* Fix overlap */
 }
 
 /* Custom Scrollbar for DebugPanel */
@@ -89,7 +186,8 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #444;
   border-radius: 5px;
-  border: 2px solid #111; /* Creates padding effect */
+  border: 2px solid #111;
+  /* Creates padding effect */
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {

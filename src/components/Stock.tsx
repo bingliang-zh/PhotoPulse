@@ -44,7 +44,7 @@ export const Stock = ({ symbols, onLog }: StockProps) => {
 
   return (
     <WidgetContainer title="Market">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+      <div className="widget-grid">
         {symbols.map(symbol => (
           <div key={symbol} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
             <span style={{ fontWeight: 'bold' }}>{symbol}</span>

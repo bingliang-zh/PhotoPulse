@@ -8,14 +8,8 @@ interface WidgetContainerProps {
 
 export const WidgetContainer: React.FC<WidgetContainerProps> = ({ children, title, style }) => {
     return (
-        <div style={{
-            color: 'white',
-            padding: 20,
-            background: 'rgba(0,0,0,0.5)',
-            borderRadius: 8,
-            ...style
-        }}>
-            {title && <h2 style={{ marginTop: 10 }}>{title}</h2>}
+        <div className="widget-container" style={style}>
+            {title && <h2 className="widget-title">{title}</h2>}
             {children}
         </div>
     );
