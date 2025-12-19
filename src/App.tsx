@@ -53,12 +53,18 @@ function App() {
 
   return (
     <div className="container">
-      <Carousel customDir={config.backgroundsDir} onStateChange={setHasImages} onLog={addLog} />
+      <Carousel interval={config.interval} onStateChange={setHasImages} onLog={addLog} />
       <div className="dashboard">
         <div className="widget-column">
-          <Weather location={config.weather} onLog={addLog} />
-          <Stock symbols={config.stocks} onLog={addLog} />
-          <CryptoWidget onLog={addLog} />
+          {config.weather && config.weather.city && (
+            <Weather location={config.weather} onLog={addLog} />
+          )}
+          {config.stocks && config.stocks.length > 0 && (
+            <Stock symbols={config.stocks} onLog={addLog} />
+          )}
+          {config.crypto && config.crypto.length > 0 && (
+            <CryptoWidget symbols={config.crypto} onLog={addLog} />
+          )}
         </div>
         <div className="time-display" style={{ marginTop: '5vh' }}>
           <h1>{time.toLocaleTimeString('en-US', { hour12: false })}</h1>
@@ -66,7 +72,7 @@ function App() {
           <h3>{time.toLocaleDateString('en-US', { weekday: 'long' })}</h3>
         </div>
       </div>
-      {debugVisible && <DebugPanel customDir={config.backgroundsDir} onClose={() => setDebugVisible(false)} logs={logs} onLog={addLog} />}
+      {debugVisible && <DebugPanel onClose={() => setDebugVisible(false)} logs={logs} onLog={addLog} />}
     </div>
   );
 }

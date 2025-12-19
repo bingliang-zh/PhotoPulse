@@ -3,19 +3,21 @@ import { fetch } from '@tauri-apps/plugin-http';
 import { WidgetContainer } from './WidgetContainer';
 
 interface CryptoProps {
+    symbols?: string[];
     onLog?: (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
 }
 
-export const CryptoWidget = ({ onLog }: CryptoProps) => {
+export const CryptoWidget = ({ symbols, onLog }: CryptoProps) => {
     const [prices, setPrices] = useState<Record<string, string>>({});
-    const symbols = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XMR-USD'];
+
+    const activeSymbols = symbols && symbols.length > 0 ? symbols : [];
 
     useEffect(() => {
         const fetchPrices = async () => {
             onLog?.('Crypto: Fetching prices...', 'info');
             const newPrices: Record<string, string> = {};
 
-            await Promise.all(symbols.map(async (symbol) => {
+            await Promise.all(activeSymbols.map(async (symbol) => {
                 try {
                     const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`);
                     if (response.ok) {
@@ -40,12 +42,12 @@ export const CryptoWidget = ({ onLog }: CryptoProps) => {
         fetchPrices();
         const timer = setInterval(fetchPrices, 5000); // Update every 5 seconds for crypto
         return () => clearInterval(timer);
-    }, []);
+    }, [symbols]);
 
     return (
         <WidgetContainer title="Crypto">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                {symbols.map(fullSymbol => {
+                {activeSymbols.map(fullSymbol => {
                     const symbol = fullSymbol.split('-')[0];
                     const price = prices[symbol];
                     return (

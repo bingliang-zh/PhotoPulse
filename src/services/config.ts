@@ -9,12 +9,15 @@ export interface WeatherConfig {
 }
 
 export interface AppConfig {
-    stocks: string[];
-    weather: WeatherConfig;
-    backgroundsDir: string;
+    stocks?: string[];
+    weather?: WeatherConfig;
+    crypto?: string[];
+    interval?: number;
 }
 
 const DEFAULT_STOCKS = ['NVDA', 'AAPL', 'GOOGL', 'MSFT', 'AVGO', 'AMD', 'QQQ', 'IREN', 'TSM'];
+const DEFAULT_CRYPTO = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XMR-USD'];
+const DEFAULT_INTERVAL = 30;
 const DEFAULT_WEATHER = {
     city: "Hangzhou",
     latitude: 30.2748,
@@ -58,7 +61,8 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
             const defaultConfig: AppConfig = {
                 stocks: DEFAULT_STOCKS,
                 weather: DEFAULT_WEATHER,
-                backgroundsDir: ""
+                crypto: DEFAULT_CRYPTO,
+                interval: DEFAULT_INTERVAL
             };
 
             try {
@@ -79,16 +83,18 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
         const config = JSON.parse(content);
 
         return {
-            stocks: config.stocks || DEFAULT_STOCKS,
-            weather: config.weather || DEFAULT_WEATHER,
-            backgroundsDir: config.backgroundsDir || ""
+            stocks: config.stocks,
+            weather: config.weather,
+            crypto: config.crypto,
+            interval: config.interval
         };
     } catch (error) {
         onLog?.(`Config: Critical error loading config: ${error}`, 'error');
         return {
             stocks: DEFAULT_STOCKS,
             weather: DEFAULT_WEATHER,
-            backgroundsDir: ""
+            crypto: DEFAULT_CRYPTO,
+            interval: DEFAULT_INTERVAL
         };
     }
 };

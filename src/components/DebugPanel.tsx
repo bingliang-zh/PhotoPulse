@@ -13,15 +13,14 @@ export interface LogEntry {
 export type OnLogCallback = (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
 
 interface DebugPanelProps {
-    customDir?: string;
     logs: LogEntry[];
     onClose: () => void;
     onLog: OnLogCallback;
 }
 
-export const DebugPanel = ({ customDir, logs, onClose, onLog }: DebugPanelProps) => {
+export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
 
-    const openConfigFolder = () => openFolderWithLogs(customDir, (msg, type) => onLog(msg, type));
+    const openConfigFolder = () => openFolderWithLogs(undefined, (msg, type) => onLog(msg, type));
 
     const getColor = (type: string) => {
         switch (type) {

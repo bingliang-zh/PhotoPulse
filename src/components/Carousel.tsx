@@ -6,12 +6,12 @@ import { appDataDir, join } from '@tauri-apps/api/path';
 import { openFolderWithLogs } from '../utils/system';
 
 interface CarouselProps {
-  customDir?: string;
+  interval?: number;
   onStateChange?: (hasImages: boolean) => void;
   onLog?: (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
 }
 
-export const Carousel = ({ customDir, onStateChange, onLog }: CarouselProps) => {
+export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps) => {
   const [index, setIndex] = useState(0);
   const [images, setImages] = useState<string[]>([]);
 
@@ -22,29 +22,17 @@ export const Carousel = ({ customDir, onStateChange, onLog }: CarouselProps) => 
         let entries: DirEntry[] = [];
         let basePath = "";
 
-        if (customDir && customDir.trim() !== "") {
-          try {
-            entries = await readDir(customDir);
-            basePath = customDir;
-          } catch (e) { /* fall through to default */ }
-        }
-
-        // If customDir didn't work or wasn't provided, try default
-        if (!entries) {
-          try {
-            // We initially try to read from AppData to see if files exist
-            entries = await readDir('backgrounds', { baseDir: BaseDirectory.AppData });
-            const appData = await appDataDir();
-            basePath = await join(appData, 'backgrounds');
-          } catch (e) {
-            // If strictly reading failed, we might still want to know the path to open for the user
-            const appData = await appDataDir();
-            basePath = await join(appData, 'backgrounds');
-
-            onLog?.(`Carousel: default background path not found or empty: ${e}`, 'warn');
-            // Don't return yet, let next block handle empty entries
-            entries = [];
-          }
+        try {
+          // We read from AppData backgrounds folder
+          entries = await readDir('backgrounds', { baseDir: BaseDirectory.AppData });
+          const appData = await appDataDir();
+          basePath = await join(appData, 'backgrounds');
+          onLog?.(`Carousel: Found ${entries.length} entries in backgrounds`, 'info');
+        } catch (e) {
+          const appData = await appDataDir();
+          basePath = await join(appData, 'backgrounds');
+          onLog?.(`Carousel: default background path not found or empty: ${e}`, 'warn');
+          entries = [];
         }
 
         const imageEntries = entries.filter(entry =>
@@ -53,14 +41,15 @@ export const Carousel = ({ customDir, onStateChange, onLog }: CarouselProps) => 
 
         if (imageEntries.length > 0) {
           const imageUrls = imageEntries.map(entry => {
-            return convertFileSrc(`${basePath}/${entry.name}`);
+            const fullPath = `${basePath}/${entry.name}`;
+            const converted = convertFileSrc(fullPath);
+            return converted;
           });
           setImages(imageUrls);
           onStateChange?.(true);
           onLog?.(`Carousel: Loaded ${imageEntries.length} images.`, 'info');
           return;
         } else {
-          // Resolved path exists but is empty of images
           onStateChange?.(false);
           onLog?.(
             'Carousel: No images found. Click the button on the right to open the folder, drag images in, and restart for changes to take effect.',
@@ -82,20 +71,34 @@ export const Carousel = ({ customDir, onStateChange, onLog }: CarouselProps) => 
 
       setImages([]);
       onStateChange?.(false);
-      // Fallback log if specific paths didn't catch it
       onLog?.('Carousel: No images found. Please check configuration.', 'warn');
     };
 
     loadImages();
-  }, [customDir]);
+  }, []);
 
   useEffect(() => {
     if (images.length === 0) return;
 
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length);
-    }, 15000);
+    }, interval * 1000);
     return () => clearInterval(timer);
+  }, [images, interval]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (images.length === 0) return;
+
+      if (e.key === 'ArrowRight') {
+        setIndex((prev) => (prev + 1) % images.length);
+      } else if (e.key === 'ArrowLeft') {
+        setIndex((prev) => (prev - 1 + images.length) % images.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [images]);
 
   if (images.length === 0) {
