@@ -43,8 +43,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-          releaseName: "Album v__VERSION__"
-          releaseBody: "See the assets below to download the latest version."
-          releaseDraft: true
+          tagName: v__VERSION__ # simplified tag name
+          releaseName: "PhotoPulse v__VERSION__"
+          releaseBody: "PhotoPulse Official Release. Repurpose your idle devices into a smart photo frame."
+          releaseDraft: false
           prerelease: false
