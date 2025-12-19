@@ -19,7 +19,11 @@ PhotoPulse is a lightweight, cross-platform application designed to transform yo
 ###  macOS
 1.  **Download**: Get the latest `.dmg` or `.app` from the [Releases](#).
 2.  **Install**: Drag `PhotoPulse` to your `Applications` folder.
-3.  **Permissions**: On the first launch, **right-click** the app and select **Open** to bypass macOS Gatekeeper.
+3.  **Permissions**: On the first launch, **right-click** the app and select **Open**. 
+    - *If you see a "damaged" error*, run this in your terminal:
+      ```bash
+      sudo xattr -rd com.apple.quarantine /Applications/PhotoPulse.app
+      ```
 4.  **Setup**: Press **`** (backtick) to open the Debug Panel, click **"Open Backgrounds"** to add your photos, and **"Open Config Folder"** to edit your settings.
 
 ### 🪟 Windows
