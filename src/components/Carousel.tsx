@@ -42,7 +42,12 @@ export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps)
         if (imageEntries.length > 0) {
           const imageUrls = await Promise.all(imageEntries.map(async (entry) => {
             const fullPath = await join(basePath, entry.name);
-            return convertFileSrc(fullPath);
+            const assetUrl = convertFileSrc(fullPath);
+            if (images.length === 0) {
+              onLog?.(`Debug: First image path resolved to: ${fullPath}`, 'info');
+              onLog?.(`Debug: First image asset URL: ${assetUrl}`, 'info');
+            }
+            return assetUrl;
           }));
           setImages(imageUrls);
           onStateChange?.(true);
@@ -132,6 +137,10 @@ export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps)
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 2 }}
+          onError={(e) => {
+            onLog?.(`Error loading image: ${images[index]}`, 'error');
+            console.error("Image load error:", e);
+          }}
           style={{
             position: 'absolute',
             width: '100%',
