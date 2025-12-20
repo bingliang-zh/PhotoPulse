@@ -40,11 +40,10 @@ export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps)
         );
 
         if (imageEntries.length > 0) {
-          const imageUrls = imageEntries.map(entry => {
-            const fullPath = `${basePath}/${entry.name}`;
-            const converted = convertFileSrc(fullPath);
-            return converted;
-          });
+          const imageUrls = await Promise.all(imageEntries.map(async (entry) => {
+            const fullPath = await join(basePath, entry.name);
+            return convertFileSrc(fullPath);
+          }));
           setImages(imageUrls);
           onStateChange?.(true);
           onLog?.(`Carousel: Loaded ${imageEntries.length} images.`, 'info');
