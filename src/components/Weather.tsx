@@ -31,9 +31,10 @@ const getAQIColor = (aqi: number) => {
 interface WeatherProps {
   location: WeatherConfig;
   onLog?: (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
+  onWeatherCode?: (code: number) => void;
 }
 
-export const Weather = ({ location, onLog }: WeatherProps) => {
+export const Weather = ({ location, onLog, onWeatherCode }: WeatherProps) => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [displayCity, setDisplayCity] = useState(location.city || "Loading...");
 
@@ -86,6 +87,7 @@ export const Weather = ({ location, onLog }: WeatherProps) => {
           data.aqi = aqiRes.data.current.us_aqi;
         }
         setWeather(data);
+        onWeatherCode?.(data?.current?.weather_code);
         onLog?.('Weather: Data updated successfully', 'info');
       } catch (error) {
         console.error('Error fetching weather:', error);

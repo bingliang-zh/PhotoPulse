@@ -6,6 +6,7 @@ import { Stock } from './components/Stock';
 import { CryptoWidget } from './components/Crypto';
 import { DebugPanel, LogEntry, OnLogCallback } from './components/DebugPanel';
 import { loadConfig, AppConfig } from './services/config';
+import { WeatherEffects } from './components/WeatherEffects';
 
 function App() {
   const [time, setTime] = useState(new Date());
@@ -13,6 +14,7 @@ function App() {
   const [hasImages, setHasImages] = useState(true);
   const [debugVisible, setDebugVisible] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [weatherCode, setWeatherCode] = useState<number | undefined>(undefined);
 
   const addLog: OnLogCallback = (message, type, action) => {
     setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);
@@ -53,11 +55,16 @@ function App() {
 
   return (
     <div className="container">
+      <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} />
       <Carousel interval={config.interval} onStateChange={setHasImages} onLog={addLog} />
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
-            <Weather location={config.weather} onLog={addLog} />
+            <Weather
+              location={config.weather}
+              onLog={addLog}
+              onWeatherCode={(code) => setWeatherCode(code)}
+            />
           )}
           {config.stocks && config.stocks.length > 0 && (
             <Stock symbols={config.stocks} onLog={addLog} />
