@@ -55,8 +55,12 @@ function App() {
 
   return (
     <div className="container">
+      <Carousel
+        interval={config.interval}
+        onStateChange={setHasImages}
+        onLog={addLog}
+      />
       <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} />
-      <Carousel interval={config.interval} onStateChange={setHasImages} onLog={addLog} />
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
@@ -73,13 +77,25 @@ function App() {
             <CryptoWidget symbols={config.crypto} onLog={addLog} />
           )}
         </div>
-        <div className="time-display" style={{ marginTop: '5vh' }}>
-          <h1>{time.toLocaleTimeString('en-US', { hour12: false })}</h1>
-          <h2>{time.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</h2>
-          <h3>{time.toLocaleDateString('en-US', { weekday: 'long' })}</h3>
+        <div className="time-display" style={{ marginTop: "5vh" }}>
+          <h1>{time.toLocaleTimeString("en-US", { hour12: false })}</h1>
+          <h2>
+            {time.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </h2>
+          <h3>{time.toLocaleDateString("en-US", { weekday: "long" })}</h3>
         </div>
       </div>
-      {debugVisible && <DebugPanel onClose={() => setDebugVisible(false)} logs={logs} onLog={addLog} />}
+      {debugVisible && (
+        <DebugPanel
+          onClose={() => setDebugVisible(false)}
+          logs={logs}
+          onLog={addLog}
+        />
+      )}
     </div>
   );
 }

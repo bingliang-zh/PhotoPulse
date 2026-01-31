@@ -24,7 +24,7 @@ const DEFAULT_WEATHER = {
     longitude: 120.1551
 };
 
-export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void): Promise<AppConfig> => {
+export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void): Promise<AppConfig> => {
     let appDataPath = "unknown";
 
     try {

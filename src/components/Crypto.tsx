@@ -4,7 +4,7 @@ import { WidgetContainer } from './WidgetContainer';
 
 interface CryptoProps {
     symbols?: string[];
-    onLog?: (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
+    onLog?: (message: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void;
 }
 
 export const CryptoWidget = ({ symbols, onLog }: CryptoProps) => {
@@ -40,7 +40,7 @@ export const CryptoWidget = ({ symbols, onLog }: CryptoProps) => {
         };
 
         fetchPrices();
-        const timer = setInterval(fetchPrices, 5000); // Update every 5 seconds for crypto
+        const timer = setInterval(fetchPrices, 60000); // Update every minute (same as Stock)
         return () => clearInterval(timer);
     }, [symbols]);
 

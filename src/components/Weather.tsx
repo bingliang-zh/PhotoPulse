@@ -30,7 +30,7 @@ const getAQIColor = (aqi: number) => {
 
 interface WeatherProps {
   location: WeatherConfig;
-  onLog?: (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
+  onLog?: (message: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void;
   onWeatherCode?: (code: number) => void;
 }
 

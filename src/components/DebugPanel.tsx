@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { openFolderWithLogs } from '../utils/system';
 
 export interface LogEntry {
     message: string;
-    type: 'info' | 'warn' | 'error';
+    type: 'info' | 'warn' | 'error' | 'debug';
     timestamp: string;
     action?: {
         label: string;
@@ -10,7 +11,7 @@ export interface LogEntry {
     };
 }
 
-export type OnLogCallback = (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
+export type OnLogCallback = (message: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void;
 
 interface DebugPanelProps {
     logs: LogEntry[];
@@ -19,13 +20,17 @@ interface DebugPanelProps {
 }
 
 export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
+    const [verbose, setVerbose] = useState(false);
 
     const openConfigFolder = () => openFolderWithLogs(undefined, (msg, type) => onLog(msg, type));
+
+    const filteredLogs = verbose ? logs : logs.filter(l => l.type !== 'debug');
 
     const getColor = (type: string) => {
         switch (type) {
             case 'error': return '#ff5252';
             case 'warn': return '#ffd740';
+            case 'debug': return '#888888';
             case 'info': default: return '#69f0ae';
         }
     };
@@ -71,6 +76,21 @@ export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
                     >
                         Config Folder
                     </button>
+
+                    <button
+                        onClick={() => setVerbose(prev => !prev)}
+                        style={{
+                            padding: '4px 12px',
+                            fontSize: '0.8rem',
+                            background: verbose ? '#555' : '#333',
+                            color: verbose ? '#fff' : '#888',
+                            border: `1px solid ${verbose ? '#888' : '#555'}`,
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Verbose {verbose ? 'ON' : 'OFF'}
+                    </button>
                 </div>
 
                 <button
@@ -98,8 +118,8 @@ export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
                 flexDirection: 'column',
                 gap: '4px'
             }}>
-                {logs.length === 0 && <div style={{ color: '#555' }}>Ready. Logs will appear here...</div>}
-                {logs.map((l, i) => (
+                {filteredLogs.length === 0 && <div style={{ color: '#555' }}>Ready. Logs will appear here...</div>}
+                {filteredLogs.map((l, i) => (
                     <div key={i} style={{ fontSize: '0.8rem', borderBottom: '1px solid #222', paddingBottom: '2px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <span style={{ color: '#666' }}>[{l.timestamp}]</span>
