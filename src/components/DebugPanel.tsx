@@ -19,11 +19,12 @@ interface DebugPanelProps {
     onLog: OnLogCallback;
     testMode?: boolean;
     onTestModeToggle?: () => void;
+    onNextWeather?: () => void;
     showBackground?: boolean;
     onBackgroundToggle?: () => void;
 }
 
-export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, showBackground, onBackgroundToggle }: DebugPanelProps) => {
+export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, onNextWeather, showBackground, onBackgroundToggle }: DebugPanelProps) => {
     const [verbose, setVerbose] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
     const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -127,6 +128,25 @@ export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, s
                             }}
                         >
                             Weather Test {testMode ? 'ON' : 'OFF'}
+                        </button>
+                    )}
+
+                    {onNextWeather && (
+                        <button
+                            onClick={onNextWeather}
+                            disabled={!testMode}
+                            style={{
+                                padding: '4px 12px',
+                                fontSize: '0.8rem',
+                                background: testMode ? '#3b82f6' : '#222',
+                                color: testMode ? '#fff' : '#444',
+                                border: `1px solid ${testMode ? '#60a5fa' : '#333'}`,
+                                borderRadius: '4px',
+                                cursor: testMode ? 'pointer' : 'not-allowed',
+                                opacity: testMode ? 1 : 0.5
+                            }}
+                        >
+                            Next Weather
                         </button>
                     )}
 

@@ -27,7 +27,16 @@ function App() {
     setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);
   }, []);
 
-  // Test mode: cycle through weather codes every 2 seconds
+  const nextWeather = useCallback(() => {
+    if (!testMode) return;
+    const currentIndex = testWeatherCodes.indexOf(weatherCode ?? 0);
+    const nextIndex = (currentIndex + 1) % testWeatherCodes.length;
+    const code = testWeatherCodes[nextIndex];
+    addLog(`Test Mode: code=${code}, effect=${testWeatherNames[nextIndex]}`, 'info');
+    setWeatherCode(code);
+  }, [testMode, weatherCode, addLog]);
+
+  // Test mode: set initial weather code when entering test mode
   useEffect(() => {
     if (!testMode) {
       // Restore real weather code when test mode is off
@@ -37,18 +46,10 @@ function App() {
       }
       return;
     }
-    let index = 0;
-    addLog(`Test Mode: Starting weather cycle`, 'info');
+
+    // Set initial weather code when entering test mode
+    addLog(`Test Mode: Started - use Next to cycle through effects`, 'info');
     setWeatherCode(testWeatherCodes[0]);
-
-    const timer = setInterval(() => {
-      index = (index + 1) % testWeatherCodes.length;
-      const code = testWeatherCodes[index];
-      addLog(`Test Mode: code=${code}, effect=${testWeatherNames[index]}`, 'info');
-      setWeatherCode(code);
-    }, 2000);
-
-    return () => clearInterval(timer);
   }, [testMode, realWeatherCode, addLog]);
 
   useEffect(() => {
@@ -145,6 +146,7 @@ function App() {
           onLog={addLog}
           testMode={testMode}
           onTestModeToggle={() => setTestMode(prev => !prev)}
+          onNextWeather={nextWeather}
           showBackground={showBackground}
           onBackgroundToggle={() => setShowBackground(prev => !prev)}
         />
