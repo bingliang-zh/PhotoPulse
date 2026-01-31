@@ -51,7 +51,7 @@ body {
   opacity: 0.9;
 }
 
-/* Sunny: soft bokeh/sun flares */
+/* Sunny: soft pulsing bokeh/sun flares */
 .weather-sun {
   opacity: 0;
   transition: opacity 600ms ease;
@@ -62,8 +62,20 @@ body {
   filter: blur(1px);
 }
 
+@keyframes sunGlow {
+  0%, 100% { 
+    opacity: 1; 
+    filter: blur(1px);
+  }
+  50% { 
+    opacity: 0.85; 
+    filter: blur(1.5px);
+  }
+}
+
 .weather-clear .weather-sun {
   opacity: 1;
+  animation: sunGlow 4s ease-in-out infinite;
 }
 
 /* Cloudy: slightly dim/blue wash */
@@ -72,7 +84,7 @@ body {
   filter: blur(2px);
 }
 
-/* Rain: glass droplets + streaks */
+/* Rain: glass droplets + animated streaks */
 .weather-rain {
   opacity: 0;
   transition: opacity 400ms ease;
@@ -91,12 +103,18 @@ body {
   filter: blur(0.2px);
 }
 
+@keyframes rainStreaks {
+  0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, -20% -20%, 10% 0; }
+  100% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 20% 100%, 50% 120%; }
+}
+
 .weather-rain .weather-rain,
 .weather-thunder .weather-rain {
   opacity: 1;
+  animation: rainStreaks 3s linear infinite;
 }
 
-/* Fog */
+/* Fog: slow drifting clouds */
 .weather-fog {
   opacity: 0;
   transition: opacity 600ms ease;
@@ -104,14 +122,23 @@ body {
     radial-gradient(120% 80% at 20% 30%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 60%),
     radial-gradient(120% 80% at 70% 60%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 65%),
     linear-gradient(to bottom, rgba(200, 220, 255, 0.06), rgba(0, 0, 0, 0));
+  background-size: 150% 150%, 180% 180%, 100% 100%;
+  background-position: 0% 50%, 100% 50%, 0 0;
   filter: blur(10px);
+}
+
+@keyframes fogDrift {
+  0% { background-position: 0% 50%, 100% 50%, 0 0; }
+  50% { background-position: 100% 50%, 0% 50%, 0 0; }
+  100% { background-position: 0% 50%, 100% 50%, 0 0; }
 }
 
 .weather-fog .weather-fog {
   opacity: 1;
+  animation: fogDrift 20s ease-in-out infinite;
 }
 
-/* Snow: soft specks */
+/* Snow: soft falling specks */
 .weather-snow {
   opacity: 0;
   transition: opacity 600ms ease;
@@ -121,11 +148,19 @@ body {
     radial-gradient(circle at 55% 35%, rgba(255,255,255,0.12) 0 2px, rgba(255,255,255,0) 3px),
     radial-gradient(circle at 75% 65%, rgba(255,255,255,0.12) 0 2px, rgba(255,255,255,0) 3px),
     radial-gradient(circle at 88% 28%, rgba(255,255,255,0.12) 0 2px, rgba(255,255,255,0) 3px);
+  background-size: 200% 200%;
+  background-position: 0% 0%;
   mix-blend-mode: screen;
+}
+
+@keyframes snowFall {
+  0% { background-position: 0% 0%, 10% 5%, 5% 10%, 20% 0%, 15% 8%; }
+  100% { background-position: 0% 200%, 10% 205%, 5% 210%, 20% 200%, 15% 208%; }
 }
 
 .weather-snow .weather-snow {
   opacity: 1;
+  animation: snowFall 8s linear infinite;
 }
 
 /* Thunder: lightning flashes */
