@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { openFolderWithLogs } from '../utils/system';
 
 export interface LogEntry {
@@ -17,14 +17,35 @@ interface DebugPanelProps {
     logs: LogEntry[];
     onClose: () => void;
     onLog: OnLogCallback;
+    testMode?: boolean;
+    onTestModeToggle?: () => void;
+    showBackground?: boolean;
+    onBackgroundToggle?: () => void;
 }
 
-export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
+export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, showBackground, onBackgroundToggle }: DebugPanelProps) => {
     const [verbose, setVerbose] = useState(false);
+    const [autoScroll, setAutoScroll] = useState(true);
+    const logsContainerRef = useRef<HTMLDivElement>(null);
 
     const openConfigFolder = () => openFolderWithLogs(undefined, (msg, type) => onLog(msg, type));
 
     const filteredLogs = verbose ? logs : logs.filter(l => l.type !== 'debug');
+
+    // Auto-scroll to bottom when new logs arrive (if autoScroll is enabled)
+    useEffect(() => {
+        if (autoScroll && logsContainerRef.current) {
+            logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+        }
+    }, [filteredLogs, autoScroll]);
+
+    // Handle scroll to detect if user is at bottom
+    const handleScroll = () => {
+        if (!logsContainerRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = logsContainerRef.current;
+        const isAtBottom = scrollHeight - scrollTop - clientHeight < 10;
+        setAutoScroll(isAtBottom);
+    };
 
     const getColor = (type: string) => {
         switch (type) {
@@ -91,6 +112,40 @@ export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
                     >
                         Verbose {verbose ? 'ON' : 'OFF'}
                     </button>
+
+                    {onTestModeToggle && (
+                        <button
+                            onClick={onTestModeToggle}
+                            style={{
+                                padding: '4px 12px',
+                                fontSize: '0.8rem',
+                                background: testMode ? '#8b5cf6' : '#333',
+                                color: testMode ? '#fff' : '#888',
+                                border: `1px solid ${testMode ? '#a78bfa' : '#555'}`,
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Weather Test {testMode ? 'ON' : 'OFF'}
+                        </button>
+                    )}
+
+                    {onBackgroundToggle && (
+                        <button
+                            onClick={onBackgroundToggle}
+                            style={{
+                                padding: '4px 12px',
+                                fontSize: '0.8rem',
+                                background: showBackground ? '#22c55e' : '#333',
+                                color: showBackground ? '#fff' : '#888',
+                                border: `1px solid ${showBackground ? '#4ade80' : '#555'}`,
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Background {showBackground ? 'ON' : 'OFF'}
+                        </button>
+                    )}
                 </div>
 
                 <button
@@ -110,14 +165,19 @@ export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
             </div>
 
             {/* Logs Area */}
-            <div className="custom-scrollbar" style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: '10px 20px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px'
-            }}>
+            <div 
+                ref={logsContainerRef}
+                onScroll={handleScroll}
+                className="custom-scrollbar" 
+                style={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    padding: '10px 20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                }}
+            >
                 {filteredLogs.length === 0 && <div style={{ color: '#555' }}>Ready. Logs will appear here...</div>}
                 {filteredLogs.map((l, i) => (
                     <div key={i} style={{ fontSize: '0.8rem', borderBottom: '1px solid #222', paddingBottom: '2px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

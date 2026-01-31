@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import { Carousel } from './components/Carousel';
 import { Weather } from './components/Weather';
@@ -15,10 +15,41 @@ function App() {
   const [debugVisible, setDebugVisible] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [weatherCode, setWeatherCode] = useState<number | undefined>(undefined);
+  const [realWeatherCode, setRealWeatherCode] = useState<number | undefined>(undefined);
+  const [testMode, setTestMode] = useState(false);
+  const [showBackground, setShowBackground] = useState(true);
 
-  const addLog: OnLogCallback = (message, type, action) => {
+  // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), snow(73), thunder(95)
+  const testWeatherCodes = [0, 3, 45, 61, 73, 95];
+  const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'snow', 'thunder'];
+
+  const addLog: OnLogCallback = useCallback((message, type, action) => {
     setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);
-  };
+  }, []);
+
+  // Test mode: cycle through weather codes every 2 seconds
+  useEffect(() => {
+    if (!testMode) {
+      // Restore real weather code when test mode is off
+      if (realWeatherCode !== undefined) {
+        setWeatherCode(realWeatherCode);
+        addLog(`Test Mode: Restored real weather code=${realWeatherCode}`, 'info');
+      }
+      return;
+    }
+    let index = 0;
+    addLog(`Test Mode: Starting weather cycle`, 'info');
+    setWeatherCode(testWeatherCodes[0]);
+
+    const timer = setInterval(() => {
+      index = (index + 1) % testWeatherCodes.length;
+      const code = testWeatherCodes[index];
+      addLog(`Test Mode: code=${code}, effect=${testWeatherNames[index]}`, 'info');
+      setWeatherCode(code);
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [testMode, realWeatherCode, addLog]);
 
   useEffect(() => {
     addLog('App: Initializing...', 'info');
@@ -55,19 +86,37 @@ function App() {
 
   return (
     <div className="container">
-      <Carousel
-        interval={config.interval}
-        onStateChange={setHasImages}
-        onLog={addLog}
-      />
-      <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} />
+      {showBackground && (
+        <Carousel
+          interval={config.interval}
+          onStateChange={setHasImages}
+          onLog={addLog}
+        />
+      )}
+      {!showBackground && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: -1,
+          background: '#1a1a1a'
+        }} />
+      )}
+      <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} onLog={addLog} />
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
             <Weather
               location={config.weather}
               onLog={addLog}
-              onWeatherCode={(code) => setWeatherCode(code)}
+              onWeatherCode={(code) => {
+                setRealWeatherCode(code);
+                if (!testMode) {
+                  setWeatherCode(code);
+                }
+              }}
             />
           )}
           {config.stocks && config.stocks.length > 0 && (
@@ -94,6 +143,10 @@ function App() {
           onClose={() => setDebugVisible(false)}
           logs={logs}
           onLog={addLog}
+          testMode={testMode}
+          onTestModeToggle={() => setTestMode(prev => !prev)}
+          showBackground={showBackground}
+          onBackgroundToggle={() => setShowBackground(prev => !prev)}
         />
       )}
     </div>

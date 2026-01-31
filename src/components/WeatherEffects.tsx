@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import type { WeatherConfig } from '../services/config';
 
 export type WeatherEffectMode = 'clear' | 'cloudy' | 'rain' | 'thunder' | 'snow' | 'fog';
@@ -19,48 +19,30 @@ export function mapWeatherCodeToEffect(code: number): WeatherEffectMode {
 type Props = {
   weatherCode?: number;
   enabled?: boolean;
+  onLog?: (message: string, type: 'info' | 'warn' | 'error' | 'debug') => void;
   // for future: location-based day/night, intensity, etc.
   location?: WeatherConfig;
 };
 
-export function WeatherEffects({ weatherCode, enabled = true }: Props) {
+export function WeatherEffects({ weatherCode, enabled = true, onLog }: Props) {
   const mode = useMemo(() => {
     if (!enabled || weatherCode === undefined || weatherCode === null) return 'clear' as WeatherEffectMode;
     return mapWeatherCodeToEffect(weatherCode);
   }, [weatherCode, enabled]);
 
+  useEffect(() => {
+    onLog?.(`WeatherEffects: Rendering effect="${mode}"`, 'info');
+  }, [mode, onLog]);
+
   return (
-    <>
-      <div className={`weather-effects weather-${mode}`} aria-hidden>
-        {/* Overlay layers are implemented purely in CSS (GPU-friendly). */}
-        <div className="weather-layer weather-vignette" />
-        <div className="weather-layer weather-sun" />
-        <div className="weather-layer weather-rain" />
-        <div className="weather-layer weather-fog" />
-        <div className="weather-layer weather-snow" />
-        <div className="weather-layer weather-lightning" />
-      </div>
-      
-      {/* Weather mode indicator - OUTSIDE weather-effects for proper z-index */}
-      <div style={{
-        position: 'fixed',
-        bottom: '36px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        padding: '8px 16px',
-        background: 'rgba(0,0,0,0.85)',
-        color: '#fff',
-        fontSize: '18px',
-        fontWeight: 'bold',
-        borderRadius: '6px',
-        fontFamily: 'monospace',
-        textTransform: 'uppercase',
-        border: '2px solid rgba(255,255,255,0.4)',
-        pointerEvents: 'none',
-        zIndex: 10000
-      }}>
-        Weather Mode: {mode} {weatherCode !== undefined ? `(code: ${weatherCode})` : ''}
-      </div>
-    </>
+    <div className={`weather-effects weather-${mode}`} aria-hidden data-weather-effect={mode}>
+      {/* Current weather effect: {mode} */}
+      <div className="weather-layer weather-vignette" />
+      <div className="weather-layer weather-sun" />
+      <div className="weather-layer weather-rain" />
+      <div className="weather-layer weather-fog" />
+      <div className="weather-layer weather-snow" />
+      <div className="weather-layer weather-lightning" />
+    </div>
   );
 }
