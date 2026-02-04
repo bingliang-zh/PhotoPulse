@@ -1,5 +1,6 @@
 import { exists, readTextFile, writeTextFile, mkdir, BaseDirectory } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
+import { invoke } from '@tauri-apps/api/core';
 import { openFolderWithLogs } from '../utils/system';
 
 export interface WeatherConfig {
@@ -13,11 +14,13 @@ export interface AppConfig {
     weather?: WeatherConfig;
     crypto?: string[];
     interval?: number;
+    autoLaunch?: boolean;
 }
 
 const DEFAULT_STOCKS = ['NVDA', 'AAPL', 'GOOGL', 'MSFT', 'AVGO', 'AMD', 'QQQ', 'IREN', 'TSM'];
 const DEFAULT_CRYPTO = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XMR-USD'];
 const DEFAULT_INTERVAL = 30;
+const DEFAULT_AUTOLAUNCH = false;
 const DEFAULT_WEATHER = {
     city: "Hangzhou",
     latitude: 30.2748,
@@ -62,7 +65,8 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
                 stocks: DEFAULT_STOCKS,
                 weather: DEFAULT_WEATHER,
                 crypto: DEFAULT_CRYPTO,
-                interval: DEFAULT_INTERVAL
+                interval: DEFAULT_INTERVAL,
+                autoLaunch: DEFAULT_AUTOLAUNCH
             };
 
             try {
@@ -86,7 +90,8 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
             stocks: config.stocks,
             weather: config.weather,
             crypto: config.crypto,
-            interval: config.interval
+            interval: config.interval,
+            autoLaunch: config.autoLaunch ?? DEFAULT_AUTOLAUNCH
         };
     } catch (error) {
         onLog?.(`Config: Critical error loading config: ${error}`, 'error');
@@ -94,7 +99,39 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
             stocks: DEFAULT_STOCKS,
             weather: DEFAULT_WEATHER,
             crypto: DEFAULT_CRYPTO,
-            interval: DEFAULT_INTERVAL
+            interval: DEFAULT_INTERVAL,
+            autoLaunch: DEFAULT_AUTOLAUNCH
         };
+    }
+};
+
+export const getAutoLaunchEnabled = async (): Promise<boolean> => {
+    try {
+        return await invoke<boolean>('get_autolaunch_enabled');
+    } catch (error) {
+        console.error('Failed to get autolaunch status:', error);
+        return false;
+    }
+};
+
+export const setAutoLaunchEnabled = async (enabled: boolean): Promise<void> => {
+    try {
+        await invoke('set_autolaunch_enabled', { enabled });
+    } catch (error) {
+        console.error('Failed to set autolaunch:', error);
+        throw error;
+    }
+};
+
+export const updateConfigAutoLaunch = async (enabled: boolean, onLog?: (msg: string, type: 'info' | 'warn' | 'error') => void): Promise<void> => {
+    try {
+        const content = await readTextFile('config.json', { baseDir: BaseDirectory.AppData });
+        const config = JSON.parse(content);
+        config.autoLaunch = enabled;
+        await writeTextFile('config.json', JSON.stringify(config, null, 2), { baseDir: BaseDirectory.AppData });
+        onLog?.(`Config: Auto-launch ${enabled ? 'enabled' : 'disabled'}`, 'info');
+    } catch (error) {
+        onLog?.(`Config: Failed to update auto-launch setting: ${error}`, 'error');
+        throw error;
     }
 };

@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { openFolderWithLogs } from '../utils/system';
+import { getAutoLaunchEnabled, setAutoLaunchEnabled, updateConfigAutoLaunch } from '../services/config';
 
 export interface LogEntry {
     message: string;
@@ -19,8 +21,39 @@ interface DebugPanelProps {
 }
 
 export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
+    const [autoLaunchEnabled, setAutoLaunchEnabledState] = useState<boolean>(false);
+    const [autoLaunchLoading, setAutoLaunchLoading] = useState<boolean>(false);
+
+    useEffect(() => {
+        // Load initial autoLaunch state
+        getAutoLaunchEnabled().then(enabled => {
+            setAutoLaunchEnabledState(enabled);
+            onLog(`AutoLaunch: Current status is ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        }).catch(err => {
+            onLog(`AutoLaunch: Failed to get status: ${err}`, 'error');
+        });
+    }, []);
 
     const openConfigFolder = () => openFolderWithLogs(undefined, (msg, type) => onLog(msg, type));
+
+    const handleAutoLaunchToggle = async () => {
+        if (autoLaunchLoading) return;
+        
+        const newValue = !autoLaunchEnabled;
+        setAutoLaunchLoading(true);
+        onLog(`AutoLaunch: ${newValue ? 'Enabling' : 'Disabling'}...`, 'info');
+
+        try {
+            await setAutoLaunchEnabled(newValue);
+            await updateConfigAutoLaunch(newValue, onLog);
+            setAutoLaunchEnabledState(newValue);
+            onLog(`AutoLaunch: Successfully ${newValue ? 'enabled' : 'disabled'}`, 'info');
+        } catch (err) {
+            onLog(`AutoLaunch: Failed to toggle: ${err}`, 'error');
+        } finally {
+            setAutoLaunchLoading(false);
+        }
+    };
 
     const getColor = (type: string) => {
         switch (type) {
@@ -71,6 +104,49 @@ export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
                     >
                         Config Folder
                     </button>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ color: '#aaa', fontSize: '0.8rem' }}>Auto Launch:</span>
+                        <label style={{ 
+                            position: 'relative', 
+                            display: 'inline-block', 
+                            width: '44px', 
+                            height: '24px',
+                            cursor: autoLaunchLoading ? 'not-allowed' : 'pointer'
+                        }}>
+                            <input 
+                                type="checkbox" 
+                                checked={autoLaunchEnabled}
+                                onChange={handleAutoLaunchToggle}
+                                disabled={autoLaunchLoading}
+                                style={{ opacity: 0, width: 0, height: 0 }}
+                            />
+                            <span style={{
+                                position: 'absolute',
+                                cursor: autoLaunchLoading ? 'not-allowed' : 'pointer',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                backgroundColor: autoLaunchEnabled ? '#4CAF50' : '#555',
+                                transition: '0.4s',
+                                borderRadius: '24px',
+                            }}>
+                                <span style={{
+                                    position: 'absolute',
+                                    content: '',
+                                    height: '18px',
+                                    width: '18px',
+                                    left: autoLaunchEnabled ? '23px' : '3px',
+                                    bottom: '3px',
+                                    backgroundColor: 'white',
+                                    transition: '0.4s',
+                                    borderRadius: '50%',
+                                }}></span>
+                            </span>
+                        </label>
+                        {autoLaunchLoading && <span style={{ color: '#ffd740', fontSize: '0.7rem' }}>...</span>}
+                    </div>
                 </div>
 
                 <button
