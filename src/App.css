@@ -38,149 +38,510 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 1;
+  overflow: hidden;
 }
 
 .weather-layer {
   position: absolute;
   inset: 0;
+  opacity: 0;
+  transition: opacity 1500ms ease-in-out;
+  will-change: opacity, transform;
 }
 
-/* Always-on subtle vignette to blend overlays */
+/* Vignette */
 .weather-vignette {
-  background: radial-gradient(80% 80% at 50% 50%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.28) 100%);
-  opacity: 0.9;
+  opacity: 1;
+  background: radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.4) 100%);
+  z-index: 10;
 }
 
-/* Sunny: soft pulsing bokeh/sun flares */
+/* =========================================
+   CLEAR / SUN
+   Tyndall Effect / God Rays (No visible orb)
+   ========================================= */
+/* Remove vignette for sunny days completely to let light through */
+.weather-clear .weather-vignette {
+  opacity: 0;
+}
+
 .weather-sun {
-  opacity: 0;
-  transition: opacity 600ms ease;
+  /* Create a massive canvas centered roughly at Top-Right off-screen */
+  width: 300vmax;
+  height: 300vmax;
+  position: absolute;
+  /* Center of the canvas is targeted here */
+  left: 75%;
+  top: -50%;
+  /* Shift back by half dimensions to actually center it */
+  margin-left: -150vmax;
+  margin-top: -150vmax;
+  
   background:
-    radial-gradient(circle at 78% 18%, rgba(255, 235, 170, 0.20) 0%, rgba(255, 235, 170, 0) 42%),
-    radial-gradient(circle at 86% 26%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 38%),
-    radial-gradient(circle at 68% 22%, rgba(255, 210, 120, 0.14) 0%, rgba(255, 210, 120, 0) 35%);
-  filter: blur(1px);
+    /* Central warm glow - Center of canvas */
+    radial-gradient(circle at center, rgba(255, 230, 160, 0.6) 0%, transparent 40%),
+    /* The God Rays - Center of canvas */
+    repeating-conic-gradient(
+      from 0deg at center, 
+      transparent 0deg, 
+      rgba(255, 255, 255, 0.12) 5deg, 
+      transparent 10deg,
+      rgba(255, 255, 255, 0.08) 15deg,
+      transparent 20deg
+    );
+  mix-blend-mode: overlay;
+  filter: blur(20px); /* Increased blur for smoother massive blending */
+  z-index: 2;
+  
+  /* Strictly hidden by default */
+  visibility: hidden; 
+  opacity: 0;
+
+  /* Animation: Rotate the whole canvas, scale breathing */
+  animation: sunCanvasAnim 40s ease-in-out infinite alternate;
 }
 
-@keyframes sunGlow {
-  0%, 100% { 
-    opacity: 1; 
-    filter: blur(1px);
+@keyframes sunCanvasAnim {
+  0% { 
+    transform: rotate(0deg) scale(1) translate(0, 0); 
+    opacity: 0.8; 
   }
-  50% { 
+  33% {
+    transform: rotate(10deg) scale(1.1) translate(2%, 2%);
+    opacity: 1;
+  }
+  66% {
+    transform: rotate(-5deg) scale(1.05) translate(-2%, 1%);
+    opacity: 0.9;
+  }
+  100% { 
+    transform: rotate(5deg) scale(1.15) translate(0, 3%); 
     opacity: 0.85; 
-    filter: blur(1.5px);
   }
 }
 
-.weather-clear .weather-sun {
-  opacity: 1;
-  animation: sunGlow 4s ease-in-out infinite;
+.weather-clear .weather-sun { 
+  visibility: visible;
+  opacity: 1; 
 }
 
-/* Cloudy: slightly dim/blue wash */
-.weather-cloudy .weather-sun {
-  opacity: 0.25;
-  filter: blur(2px);
+
+/* =========================================
+   CLOUDY
+   Dynamic Rolling Cloud Ceiling
+   ========================================= */
+.weather-cloudy .weather-vignette {
+  /* Ambient overcast Tint: Cool grey-blue at top, fading to clear */
+  background: linear-gradient(to bottom, rgba(30, 40, 50, 0.3) 0%, transparent 35%);
+  mix-blend-mode: normal;
 }
 
-/* Rain: glass droplets + animated streaks */
-.weather-rain {
+/* Layer 1: The heavy cloud base (Slow drift) */
+.weather-cloudy::before {
+  content: "";
+  position: absolute;
+  top: -20vh; /* Start higher up */
+  left: -20%;
+  width: 140%;
+  /* Increase container height so we can draw "long" clouds without clipping */
+  height: 70vh; 
+  
+  background: 
+    /* 1. Use Ellipses to force vertical shapes */
+    /* Deep Drooping Cloud (Left) - Hangs low */
+    radial-gradient(ellipse 25vw 40vh at 20% 45%, rgba(220, 230, 240, 0.8) 0%, transparent 70%),
+    
+    /* 2. Higher Recessed Gap (Center-Left) - Much higher "cave" */
+    radial-gradient(circle 25vh at 40% 10%, rgba(200, 215, 225, 0.5) 0%, transparent 60%),
+    
+    /* 3. Massive Main Cloud (Center-Right) - Raised from 60% to 40% to be less intrusive */
+    radial-gradient(ellipse 35vw 45vh at 65% 40%, rgba(215, 225, 235, 0.85) 0%, transparent 70%),
+    
+    /* 4. Medium Cloud (Far Right) */
+    radial-gradient(circle 30vh at 90% 35%, rgba(210, 220, 230, 0.7) 0%, transparent 60%);
+    
+  /* Restored heavier blur */
+  filter: blur(45px);
+  opacity: 0.9;
+  z-index: 1;
+  animation: cloudDriftDeep 60s ease-in-out infinite alternate;
+}
+
+/* Layer 2: Lighter mist/highlights (Faster drift) */
+.weather-cloudy::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  left: -10%;
+  width: 120%;
+  height: 30vh;
+  
+  background: 
+    radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 40%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+    
+  filter: blur(30px);
+  mix-blend-mode: overlay;
+  z-index: 2;
+  animation: cloudDriftSurface 35s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes cloudDriftDeep {
+  0% { transform: translateX(-4%) translateY(0) scale(1); }
+  50% { transform: translateX(2%) translateY(1%) scale(1.02); }
+  100% { transform: translateX(6%) translateY(2%) scale(1.05); }
+}
+
+@keyframes cloudDriftSurface {
+  0% { transform: translateX(-8%) translateY(-2%) scale(0.95); opacity: 0.8; }
+  100% { transform: translateX(8%) translateY(2%) scale(1.1); opacity: 1; }
+}
+
+
+/* =========================================
+   RAIN (Refactored: Multi-Layer Stroboscopic)
+   Concept: Randomly distributed vertical lines that flash on/off.
+   5 Layers simulating depth.
+   ========================================= */
+.weather-layer.weather-rain {
+  z-index: 5;
+  /* Darken slightly for rain atmosphere */
+  background-color: rgba(10, 20, 30, 0.15);
+  backdrop-filter: blur(1px) grayscale(20%);
+  
   opacity: 0;
-  transition: opacity 400ms ease;
-  background:
-    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.12) 0 3px, rgba(255, 255, 255, 0) 4px),
-    radial-gradient(circle at 22% 34%, rgba(255, 255, 255, 0.10) 0 2px, rgba(255, 255, 255, 0) 3px),
-    radial-gradient(circle at 38% 16%, rgba(255, 255, 255, 0.08) 0 2px, rgba(255, 255, 255, 0) 3px),
-    radial-gradient(circle at 55% 42%, rgba(255, 255, 255, 0.10) 0 3px, rgba(255, 255, 255, 0) 4px),
-    radial-gradient(circle at 76% 22%, rgba(255, 255, 255, 0.10) 0 2px, rgba(255, 255, 255, 0) 3px),
-    radial-gradient(circle at 88% 36%, rgba(255, 255, 255, 0.10) 0 3px, rgba(255, 255, 255, 0) 4px),
-    linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0) 60%),
-    linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0) 60%);
-  background-size: auto, auto, auto, auto, auto, auto, 180% 180%, 240% 240%;
-  background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 30% 20%;
-  mix-blend-mode: screen;
-  filter: blur(0.2px);
+  visibility: hidden;
+  transition: opacity 1s ease, visibility 1s ease;
+  mix-blend-mode: normal; 
 }
 
-@keyframes rainStreaks {
-  0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, -20% -20%, 10% 0; }
-  100% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 20% 100%, 50% 120%; }
+/* Rain on Glass Feature (Foreground) */
+.rain-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  opacity: 0.7;
+  mix-blend-mode: overlay;
+  background-image: 
+    radial-gradient(1px 1px at 5% 15%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(2px 2px at 10% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 25%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(2px 2px at 20% 5%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 30% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 18%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 70% 5%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(2px 2px at 90% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 95% 25%, rgba(255,255,255,0.5) 0%, transparent 100%);
+  background-size: 300px 300px;
 }
 
-.weather-rain .weather-rain,
-.weather-thunder .weather-rain {
-  opacity: 1;
-  animation: rainStreaks 3s linear infinite;
+/* Base "Function" for Rain Layer */
+.rain-layer {
+  content: "";
+  position: absolute;
+  /* Oversized (400% x 150%) to cover rotation and translation gaps */
+  top: -25%;
+  left: -150%; 
+  width: 400%; 
+  height: 150%;
+  rotate: 15deg;
+  
+  opacity: var(--rain-opacity);
+  filter: blur(var(--rain-blur));
+  z-index: calc(-1 * var(--i)); /* Higher index = deeper in Z (lower z-index) */
+
+  /* Default animation structure using variables */
+  /* Duration / 20 steps = Fade Cycle */
+  animation: 
+    var(--rain-anim-name) var(--rain-duration) steps(1) infinite, 
+    rainFade calc(var(--rain-duration) / 20) ease-in-out infinite;
 }
 
-/* Fog: slow drifting clouds */
-.weather-fog {
-  opacity: 0;
-  transition: opacity 600ms ease;
-  background:
-    radial-gradient(120% 80% at 20% 30%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 60%),
-    radial-gradient(120% 80% at 70% 60%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 65%),
-    linear-gradient(to bottom, rgba(200, 220, 255, 0.06), rgba(0, 0, 0, 0));
-  background-size: 150% 150%, 180% 180%, 100% 100%;
-  background-position: 0% 50%, 100% 50%, 0 0;
-  filter: blur(10px);
+/* Layer 1: Closest, Sharpest, Fastest */
+.rain-layer.layer-1 {
+  --rain-anim-name: rainRandomA;
+  --rain-duration: 80s;
+  --rain-opacity: 0.9;
+  --rain-blur: 0.5px;
+  
+  background-image: linear-gradient(to right,
+    transparent 0%,
+    transparent 2%, rgba(255,255,255,0.6) 2.1%, transparent 2.2%, 
+    transparent 15%, rgba(255,255,255,0.7) 15.1%, transparent 15.2%,
+    transparent 29%, rgba(255,255,255,0.5) 29.1%, transparent 29.2%,
+    transparent 45%, rgba(255,255,255,0.6) 45.1%, transparent 45.2%,
+    transparent 63%, rgba(255,255,255,0.4) 63.1%, transparent 63.2%,
+    transparent 81%, rgba(255,255,255,0.5) 81.1%, transparent 81.2%,
+    transparent 96%, rgba(255,255,255,0.6) 96.1%, transparent 96.2%
+  );
 }
 
-@keyframes fogDrift {
-  0% { background-position: 0% 50%, 100% 50%, 0 0; }
-  50% { background-position: 100% 50%, 0% 50%, 0 0; }
-  100% { background-position: 0% 50%, 100% 50%, 0 0; }
+/* Layer 2: Close-Mid */
+.rain-layer.layer-2 {
+  --rain-anim-name: rainRandomB;
+  --rain-duration: 90s;
+  --rain-opacity: 0.8;
+  --rain-blur: 1.5px;
+  
+  background-image: linear-gradient(to right,
+    transparent 0%,
+    transparent 5%, rgba(255,255,255,0.4) 5.1%, transparent 5.2%,
+    transparent 12%, rgba(255,255,255,0.4) 12.1%, transparent 12.2%,
+    transparent 33%, rgba(255,255,255,0.4) 33.1%, transparent 33.2%,
+    transparent 48%, rgba(255,255,255,0.4) 48.1%, transparent 48.2%,
+    transparent 66%, rgba(255,255,255,0.4) 66.1%, transparent 66.2%,
+    transparent 85%, rgba(255,255,255,0.4) 85.1%, transparent 85.2%,
+    transparent 92%, rgba(255,255,255,0.4) 92.1%, transparent 92.2%
+  );
 }
 
-.weather-fog .weather-fog {
-  opacity: 1;
-  animation: fogDrift 20s ease-in-out infinite;
+/* Layer 3: Middle */
+.rain-layer.layer-3 {
+  --rain-anim-name: rainRandomA;
+  --rain-duration: 100s;
+  --rain-opacity: 0.6;
+  --rain-blur: 2.5px;
+
+  /* Shifted gradient A (simulated by different animation + start pos implies diff, but let's vary gradient) */
+  background-image: linear-gradient(to right,
+    transparent 0%,
+    transparent 8%, rgba(255,255,255,0.3) 8.1%, transparent 8.2%,
+    transparent 22%, rgba(255,255,255,0.3) 22.1%, transparent 22.2%,
+    transparent 38%, rgba(255,255,255,0.3) 38.1%, transparent 38.2%,
+    transparent 55%, rgba(255,255,255,0.3) 55.1%, transparent 55.2%,
+    transparent 72%, rgba(255,255,255,0.3) 72.1%, transparent 72.2%,
+    transparent 88%, rgba(255,255,255,0.3) 88.1%, transparent 88.2%
+  );
 }
 
-/* Snow: soft falling specks */
+/* Layer 4: Far-Mid */
+.rain-layer.layer-4 {
+  --rain-anim-name: rainRandomB;
+  --rain-duration: 115s;
+  --rain-opacity: 0.5;
+  --rain-blur: 4px;
+
+  background-image: linear-gradient(to right,
+    transparent 0%,
+    transparent 3%, rgba(255,255,255,0.25) 3.1%, transparent 3.2%,
+    transparent 18%, rgba(255,255,255,0.25) 18.1%, transparent 18.2%,
+    transparent 41%, rgba(255,255,255,0.25) 41.1%, transparent 41.2%,
+    transparent 63%, rgba(255,255,255,0.25) 63.1%, transparent 63.2%,
+    transparent 76%, rgba(255,255,255,0.25) 76.1%, transparent 76.2%,
+    transparent 94%, rgba(255,255,255,0.25) 94.1%, transparent 94.2%
+  );
+}
+
+/* Layer 5: Farthest */
+.rain-layer.layer-5 {
+  --rain-anim-name: rainRandomA;
+  --rain-duration: 130s;
+  --rain-opacity: 0.4;
+  --rain-blur: 6px;
+
+  background-image: linear-gradient(to right,
+    transparent 0%,
+    transparent 6%, rgba(255,255,255,0.2) 6.1%, transparent 6.2%,
+    transparent 28%, rgba(255,255,255,0.2) 28.1%, transparent 28.2%,
+    transparent 52%, rgba(255,255,255,0.2) 52.1%, transparent 52.2%,
+    transparent 70%, rgba(255,255,255,0.2) 70.1%, transparent 70.2%,
+    transparent 84%, rgba(255,255,255,0.2) 84.1%, transparent 84.2%
+  );
+}
+
+/* Fade In/Out for Stroboscopic Rain */
+@keyframes rainFade {
+  0% { opacity: 0; }
+  20% { opacity: var(--rain-opacity, 1); }
+  80% { opacity: var(--rain-opacity, 1); }
+  100% { opacity: 0; }
+}
+
+/* Pseudo-Random Positions (20 steps) */
+@keyframes rainRandomA {
+  0% { transform: translateX(0%); }
+  5% { transform: translateX(20%); }
+  10% { transform: translateX(-15%); }
+  15% { transform: translateX(35%); }
+  20% { transform: translateX(-5%); }
+  25% { transform: translateX(45%); }
+  30% { transform: translateX(-25%); }
+  35% { transform: translateX(10%); }
+  40% { transform: translateX(-35%); }
+  45% { transform: translateX(25%); }
+  50% { transform: translateX(-40%); }
+  55% { transform: translateX(15%); }
+  60% { transform: translateX(-10%); }
+  65% { transform: translateX(40%); }
+  70% { transform: translateX(-20%); }
+  75% { transform: translateX(30%); }
+  80% { transform: translateX(-45%); }
+  85% { transform: translateX(5%); }
+  90% { transform: translateX(-30%); }
+  95% { transform: translateX(50%); }
+  100% { transform: translateX(0%); }
+}
+
+@keyframes rainRandomB {
+  0% { transform: translateX(0%); }
+  5% { transform: translateX(-20%); }
+  10% { transform: translateX(35%); }
+  15% { transform: translateX(-45%); }
+  20% { transform: translateX(15%); }
+  25% { transform: translateX(-10%); }
+  30% { transform: translateX(40%); }
+  35% { transform: translateX(-30%); }
+  40% { transform: translateX(25%); }
+  45% { transform: translateX(-15%); }
+  50% { transform: translateX(50%); }
+  55% { transform: translateX(-25%); }
+  60% { transform: translateX(10%); }
+  65% { transform: translateX(-35%); }
+  70% { transform: translateX(30%); }
+  75% { transform: translateX(-5%); }
+  80% { transform: translateX(45%); }
+  85% { transform: translateX(-40%); }
+  90% { transform: translateX(20%); }
+  95% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.weather-rain .weather-layer.weather-rain,
+.weather-thunder .weather-layer.weather-rain { 
+  opacity: 1; 
+  visibility: visible;
+}
+
+
+/* =========================================
+   SNOW
+   Dreamy drifting particles
+   ========================================= */
 .weather-snow {
+  z-index: 5;
+}
+
+.weather-snow::before,
+.weather-snow::after {
+  content: "";
+  position: absolute;
+  inset: -100% 0 0 0;
+  background-image: 
+    radial-gradient(3px 3px at 20% 30%, white 50%, transparent 100%),
+    radial-gradient(3px 3px at 40% 70%, white 50%, transparent 100%),
+    radial-gradient(3px 3px at 60% 20%, white 50%, transparent 100%),
+    radial-gradient(4px 4px at 80% 40%, rgba(255,255,255,0.8) 50%, transparent 100%),
+    radial-gradient(3px 3px at 10% 80%, white 50%, transparent 100%);
+  background-size: 400px 400px;
   opacity: 0;
-  transition: opacity 600ms ease;
-  background:
-    radial-gradient(circle at 15% 25%, rgba(255,255,255,0.14) 0 2px, rgba(255,255,255,0) 3px),
-    radial-gradient(circle at 35% 55%, rgba(255,255,255,0.12) 0 2px, rgba(255,255,255,0) 3px),
-    radial-gradient(circle at 55% 35%, rgba(255,255,255,0.12) 0 2px, rgba(255,255,255,0) 3px),
-    radial-gradient(circle at 75% 65%, rgba(255,255,255,0.12) 0 2px, rgba(255,255,255,0) 3px),
-    radial-gradient(circle at 88% 28%, rgba(255,255,255,0.12) 0 2px, rgba(255,255,255,0) 3px);
-  background-size: 200% 200%;
-  background-position: 0% 0%;
-  mix-blend-mode: screen;
+}
+
+/* Layer 1: Close/Bright */
+.weather-snow::before {
+  animation: snowFall 10s linear infinite;
+  opacity: 0.9;
+  z-index: 2;
+}
+
+/* Layer 2: Far/Blurry/Slow */
+.weather-snow::after {
+  background-size: 300px 300px;
+  filter: blur(2px);
+  animation: snowFall 20s linear infinite;
+  opacity: 0.6;
+  z-index: 1;
+  transform: scale(0.8);
 }
 
 @keyframes snowFall {
-  0% { background-position: 0% 0%, 10% 5%, 5% 10%, 20% 0%, 15% 8%; }
-  100% { background-position: 0% 200%, 10% 205%, 5% 210%, 20% 200%, 15% 208%; }
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 800px; } /* Slight drift right */
 }
 
-.weather-snow .weather-snow {
-  opacity: 1;
-  animation: snowFall 8s linear infinite;
+.weather-snow .weather-snow { opacity: 1; }
+
+
+/* =========================================
+   FOG
+   Horizontal drifting mist
+   ========================================= */
+.weather-fog {
+  background: linear-gradient(to top, rgba(200, 210, 225, 0.4) 0%, transparent 60%);
+  z-index: 8; /* In front of simple stuff */
 }
 
-/* Thunder: lightning flashes */
+.weather-fog::before,
+.weather-fog::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%; /* Double width for looping */
+  height: 60%;
+  background: 
+    linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 25%, transparent 50%, rgba(255,255,255,0.3) 75%, transparent 100%);
+  background-size: 50% 100%;
+  filter: blur(20px);
+}
+
+.weather-fog::before {
+  animation: fogMove 25s linear infinite;
+  opacity: 0.5;
+}
+
+.weather-fog::after {
+  animation: fogMove 40s linear infinite reverse;
+  opacity: 0.3;
+  height: 80%;
+  bottom: 10%;
+}
+
+@keyframes fogMove {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.weather-fog .weather-fog { opacity: 1; }
+
+
+/* =========================================
+   THUNDER
+   Rain + Flashes
+   ========================================= */
 .weather-lightning {
+  background: rgba(10, 10, 30, 0.3); /* Stormy dark tint */
+  mix-blend-mode: hard-light;
+  z-index: 6;
+}
+
+.weather-lightning::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  mix-blend-mode: overlay;
   opacity: 0;
-  background: radial-gradient(circle at 70% 25%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 55%);
-  mix-blend-mode: screen;
 }
 
-@keyframes lightning {
-  0%, 92%, 100% { opacity: 0; }
-  93% { opacity: 0.55; }
-  94% { opacity: 0.12; }
-  95% { opacity: 0.65; }
-  96% { opacity: 0.08; }
+.weather-thunder .weather-lightning { opacity: 1; }
+
+.weather-thunder .weather-lightning::before {
+  animation: thunderStrobe 7s infinite;
 }
 
-.weather-thunder .weather-lightning {
-  animation: lightning 7s infinite;
+@keyframes thunderStrobe {
+  0%, 90%, 100% { opacity: 0; }
+  92% { opacity: 0.8; } /* Flash 1 */
+  92.5% { opacity: 0.1; }
+  93% { opacity: 0.6; } /* Flash 2 */
+  94% { opacity: 0; }
 }
+
+/* ========================================= */
+
 
 .dashboard {
   position: absolute;
@@ -188,6 +549,8 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
+  /* Ensure dashboard sits ON TOP of all weather layers (which are z-index ~5-10) */
+  z-index: 20; 
   display: flex;
   justify-content: space-between;
   align-items: flex-start;

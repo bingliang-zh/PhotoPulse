@@ -19,9 +19,9 @@ function App() {
   const [testMode, setTestMode] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
 
-  // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), snow(73), thunder(95)
-  const testWeatherCodes = [0, 3, 45, 61, 73, 95];
-  const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'snow', 'thunder'];
+  // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
+  const testWeatherCodes = [0, 3, 45, 61, 95, 73];
+  const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'thunder', 'snow'];
 
   const addLog: OnLogCallback = useCallback((message, type, action) => {
     setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);

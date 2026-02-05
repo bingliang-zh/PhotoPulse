@@ -39,7 +39,15 @@ export function WeatherEffects({ weatherCode, enabled = true, onLog }: Props) {
       {/* Current weather effect: {mode} */}
       <div className="weather-layer weather-vignette" />
       <div className="weather-layer weather-sun" />
-      <div className="weather-layer weather-rain" />
+      <div className="weather-layer weather-rain">
+        <div className="rain-glass" />
+        {/* 5 Layers for depth: Index 1 (Close) -> Index 5 (Far) */}
+        <div className="rain-layer layer-1" style={{"--i": 1} as React.CSSProperties} />
+        <div className="rain-layer layer-2" style={{"--i": 2} as React.CSSProperties} />
+        <div className="rain-layer layer-3" style={{"--i": 3} as React.CSSProperties} />
+        <div className="rain-layer layer-4" style={{"--i": 4} as React.CSSProperties} />
+        <div className="rain-layer layer-5" style={{"--i": 5} as React.CSSProperties} />
+      </div>
       <div className="weather-layer weather-fog" />
       <div className="weather-layer weather-snow" />
       <div className="weather-layer weather-lightning" />
