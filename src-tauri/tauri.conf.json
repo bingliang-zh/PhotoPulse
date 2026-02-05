@@ -13,9 +13,9 @@
     "windows": [
       {
         "fullscreen": true,
-        "title": "tauri-app",
-        "width": 800,
-        "height": 600
+        "title": "PhotoPulse",
+        "width": 1366,
+        "height": 768
       }
     ],
     "security": {

@@ -106,7 +106,7 @@ export const DebugPanel = ({ logs, onClose, onLog }: DebugPanelProps) => {
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ color: '#aaa', fontSize: '0.8rem' }}>Auto Launch:</span>
+                        <span style={{ color: '#aaa', fontSize: '0.8rem' }}>Launch on Login:</span>
                         <label style={{ 
                             position: 'relative', 
                             display: 'inline-block', 
