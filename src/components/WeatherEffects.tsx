@@ -1,7 +1,16 @@
 import { useMemo, useEffect } from 'react';
 import type { WeatherConfig } from '../services/config';
+import './WeatherEffects.css';
+import { Rain } from './weather/Rain';
+import { Sun } from './weather/Sun';
+import { Cloudy } from './weather/Cloudy';
+import { Snow } from './weather/Snow';
+import { Fog } from './weather/Fog';
+import { Lightning } from './weather/Lightning';
+import { Vignette } from './weather/Vignette';
 
 export type WeatherEffectMode = 'clear' | 'cloudy' | 'rain' | 'thunder' | 'snow' | 'fog';
+
 
 // Open-Meteo weather codes:
 // https://open-meteo.com/en/docs
@@ -36,21 +45,24 @@ export function WeatherEffects({ weatherCode, enabled = true, onLog }: Props) {
 
   return (
     <div className={`weather-effects weather-${mode}`} aria-hidden data-weather-effect={mode}>
-      {/* Current weather effect: {mode} */}
-      <div className="weather-layer weather-vignette" />
-      <div className="weather-layer weather-sun" />
-      <div className="weather-layer weather-rain">
-        <div className="rain-glass" />
-        {/* 5 Layers for depth: Index 1 (Close) -> Index 5 (Far) */}
-        <div className="rain-layer layer-1" style={{"--i": 1} as React.CSSProperties} />
-        <div className="rain-layer layer-2" style={{"--i": 2} as React.CSSProperties} />
-        <div className="rain-layer layer-3" style={{"--i": 3} as React.CSSProperties} />
-        <div className="rain-layer layer-4" style={{"--i": 4} as React.CSSProperties} />
-        <div className="rain-layer layer-5" style={{"--i": 5} as React.CSSProperties} />
-      </div>
-      <div className="weather-layer weather-fog" />
-      <div className="weather-layer weather-snow" />
-      <div className="weather-layer weather-lightning" />
+      {/* 
+          All Weather Components are fully isolated CSS Modules.
+          They receive an 'active' prop to handle their own transitions.
+      */}
+      
+      <Vignette mode={mode} />
+      
+      <Sun active={mode === 'clear'} />
+      
+      <Cloudy active={mode === 'cloudy'} />
+      
+      <Rain active={mode === 'rain' || mode === 'thunder'} />
+      
+      <Fog active={mode === 'fog'} />
+      
+      <Snow active={mode === 'snow'} />
+      
+      <Lightning active={mode === 'thunder'} />
     </div>
   );
 }

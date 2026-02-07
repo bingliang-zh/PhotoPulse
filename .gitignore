@@ -14,8 +14,8 @@ dist-ssr
 #src/assets/backgrounds
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+.vscode
+.github
 .idea
 .DS_Store
 *.suo

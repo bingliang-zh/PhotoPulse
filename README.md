@@ -79,3 +79,42 @@ Customize your experience by editing the `config.json` file in your system's App
 - **stocks / crypto**: Arrays of Yahoo Finance ticker symbols.
 - **interval**: Seconds between automatic image changes (default: 30).
 - **weather**: City name and coordinates for local updates.
+
+---
+
+## 🛠 Development
+
+This project uses **Tauri v2** + **Vite** + **React**. We use **pnpm** as the package manager.
+
+### Prerequisites
+
+- **Node.js** (Latest LTS recommended)
+- **Rust** (Latest Stable)
+  - Install via: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+- **pnpm**
+  - Install via: `npm install -g pnpm`
+
+### Setup
+
+```bash
+# Install dependencies
+pnpm install
+```
+
+### Running
+
+```bash
+# Run in development mode (Desktop App)
+pnpm tauri dev
+
+# Run in web browser only
+pnpm dev
+```
+
+### Building
+
+```bash
+# Build for production
+pnpm tauri build
+```
+
