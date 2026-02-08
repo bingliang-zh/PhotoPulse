@@ -7,7 +7,6 @@ import { Cloudy } from './weather/Cloudy';
 import { Snow } from './weather/Snow';
 import { Fog } from './weather/Fog';
 import { Lightning } from './weather/Lightning';
-import { Vignette } from './weather/Vignette';
 
 export type WeatherEffectMode = 'clear' | 'cloudy' | 'rain' | 'thunder' | 'snow' | 'fog';
 
@@ -50,13 +49,14 @@ export function WeatherEffects({ weatherCode, enabled = true, onLog }: Props) {
           They receive an 'active' prop to handle their own transitions.
       */}
       
-      <Vignette mode={mode} />
-      
       <Sun active={mode === 'clear'} />
       
       <Cloudy active={mode === 'cloudy'} />
       
-      <Rain active={mode === 'rain' || mode === 'thunder'} />
+      <Rain 
+        active={mode === 'rain' || mode === 'thunder'} 
+        intensity={mode === 'thunder' ? 'heavy' : 'moderate'}
+      />
       
       <Fog active={mode === 'fog'} />
       

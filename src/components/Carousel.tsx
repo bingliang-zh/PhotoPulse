@@ -61,7 +61,7 @@ export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps)
             {
               label: 'Open Backgrounds',
               handler: async () => {
-                await openFolderWithLogs('backgrounds', (msg: string, type: 'info' | 'warn' | 'error') => onLog?.(msg, type));
+                await openFolderWithLogs('backgrounds', (msg, type) => onLog?.(msg, type));
               }
             }
           );
