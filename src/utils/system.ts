@@ -3,7 +3,7 @@ import { openPath } from '@tauri-apps/plugin-opener';
 
 // Reuse OnLogCallback type if possible, or redefine it here to avoid circular dep, 
 // but usually types should be in a types file. For now, simplest is to accept the function.
-type OnLog = (message: string, type: 'info' | 'warn' | 'error') => void;
+type OnLog = (message: string, type: 'info' | 'warn' | 'error' | 'debug') => void;
 
 export const openFolderWithLogs = async (relativePath: string | undefined, onLog?: OnLog) => {
     onLog?.("Attempting to open path...", 'info');

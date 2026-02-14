@@ -1,0 +1,36 @@
+/* Lightning.module.css */
+
+.container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(10, 10, 30, 0.3); /* Stormy dark tint */
+  mix-blend-mode: hard-light;
+  z-index: 6;
+
+  opacity: 0;
+  transition: opacity 1500ms ease-in-out;
+}
+
+.active {
+  opacity: 1;
+}
+
+.active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  /* Only animate when active */
+  animation: thunderStrobe 7s infinite;
+}
+
+@keyframes thunderStrobe {
+  0%, 90%, 100% { opacity: 0; }
+  92% { opacity: 0.8; } /* Flash 1 */
+  92.5% { opacity: 0.1; }
+  93% { opacity: 0.6; } /* Flash 2 */
+  94% { opacity: 0; }
+}

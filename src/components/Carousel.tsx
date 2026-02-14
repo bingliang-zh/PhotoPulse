@@ -8,7 +8,7 @@ import { openFolderWithLogs } from '../utils/system';
 interface CarouselProps {
   interval?: number;
   onStateChange?: (hasImages: boolean) => void;
-  onLog?: (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
+  onLog?: (message: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void;
 }
 
 export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps) => {
@@ -44,8 +44,8 @@ export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps)
             const fullPath = await join(basePath, entry.name);
             const assetUrl = convertFileSrc(fullPath);
             if (images.length === 0) {
-              onLog?.(`Debug: First image path resolved to: ${fullPath}`, 'info');
-              onLog?.(`Debug: First image asset URL: ${assetUrl}`, 'info');
+              onLog?.(`Debug: First image path resolved to: ${fullPath}`, 'debug');
+              onLog?.(`Debug: First image asset URL: ${assetUrl}`, 'debug');
             }
             return assetUrl;
           }));
@@ -61,7 +61,7 @@ export const Carousel = ({ interval = 30, onStateChange, onLog }: CarouselProps)
             {
               label: 'Open Backgrounds',
               handler: async () => {
-                await openFolderWithLogs('backgrounds', (msg: string, type: 'info' | 'warn' | 'error') => onLog?.(msg, type));
+                await openFolderWithLogs('backgrounds', (msg, type) => onLog?.(msg, type));
               }
             }
           );
