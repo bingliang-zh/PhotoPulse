@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { WeatherConfig } from '../services/config';
 import { WidgetContainer } from './WidgetContainer';
+import { mapWeatherCodeToEffect, WeatherEffectMode } from './WeatherEffects';
 
 interface WeatherData {
   current: {
@@ -26,6 +27,18 @@ const getAQIColor = (aqi: number) => {
   if (aqi <= 200) return '#ff1744'; // Unhealthy
   if (aqi <= 300) return '#d500f9'; // Very Unhealthy
   return '#b71c1c'; // Hazardous
+};
+
+const getWeatherLabel = (mode: WeatherEffectMode): string => {
+  const labels: Record<WeatherEffectMode, string> = {
+    'clear': 'Clear',
+    'cloudy': 'Cloudy',
+    'rain': 'Rain',
+    'thunder': 'Thunderstorm',
+    'snow': 'Snow',
+    'fog': 'Fog'
+  };
+  return labels[mode];
 };
 
 interface WeatherProps {
@@ -118,25 +131,56 @@ export const Weather = ({ location, onLog, onWeatherCode }: WeatherProps) => {
   const { current, daily, aqi } = weather;
   const sunrise = new Date(daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   const sunset = new Date(daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  const weatherMode = mapWeatherCodeToEffect(current.weather_code);
 
   return (
     <WidgetContainer title={displayCity}>
-      <div className="weather-main">
-        <p className="weather-temp">{current.temperature_2m}°C</p>
-        <div>
-          <p style={{ margin: 0, opacity: 0.8 }}>High: {daily.temperature_2m_max[0]}°C</p>
-          <p style={{ margin: 0, opacity: 0.8 }}>Low: {daily.temperature_2m_min[0]}°C</p>
+      <div className="weather-main" style={{ marginBottom: '20px' }}>
+        <p className="weather-temp" style={{ fontWeight: '300' }}>{current.temperature_2m}°C</p>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ fontSize: '0.9em', opacity: 0.8, display: 'flex', gap: '8px' }}>
+            <span>H: {daily.temperature_2m_max[0]}°</span>
+            <span>L: {daily.temperature_2m_min[0]}°</span>
+          </div>
+          <div style={{ fontSize: '1.1em', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.9em', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9 }}>
+              {getWeatherLabel(weatherMode)}
+            </span>
+          </div>
         </div>
       </div>
-      <div className="weather-info">
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <span>🌅 {sunrise}</span>
-          <span>🌇 {sunset}</span>
+
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(2, 1fr)', 
+        gap: '12px',
+        paddingTop: '15px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '0.7em', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sunrise</span>
+            <span style={{ fontSize: '0.9em' }}>{sunrise}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '0.7em', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sunset</span>
+            <span style={{ fontSize: '0.9em' }}>{sunset}</span>
+          </div>
         </div>
         {aqi !== undefined && (
-          <p style={{ margin: 0 }}>
-            AQI: <span style={{ color: getAQIColor(aqi), fontWeight: 'bold' }}>{aqi}</span>
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', gridColumn: 'span 2', marginTop: '4px' }}>
+            <span style={{ 
+              width: '8px', 
+              height: '8px', 
+              borderRadius: '50%', 
+              backgroundColor: getAQIColor(aqi),
+              boxShadow: `0 0 10px ${getAQIColor(aqi)}`
+            }}></span>
+            <span style={{ fontSize: '0.8em', opacity: 0.7 }}>Air Quality Index:</span>
+            <span style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{aqi}</span>
+          </div>
         )}
       </div>
     </WidgetContainer>
