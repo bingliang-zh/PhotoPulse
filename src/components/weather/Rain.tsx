@@ -232,9 +232,14 @@ export const Rain: React.FC<Props> = ({ active, count, intensity = 'moderate' })
   const effectiveCount = count || (intensity === 'heavy' ? 200 : 100);
   const windowDropsCount = intensity === 'heavy' ? 40 : 20;
 
+  // Don't render Canvas when not active to save GPU/CPU resources
+  if (!active) {
+    return null;
+  }
+
   return (
     <div 
-      className={`${styles.container} ${active ? styles.active : ''}`}
+      className={`${styles.container} ${styles.active}`}
       aria-hidden="true"
     >
       {/* R3F Canvas */}
