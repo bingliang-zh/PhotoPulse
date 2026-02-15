@@ -1,0 +1,45 @@
+.container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(200, 210, 225, 0.4) 0%, transparent 60%);
+  z-index: 8; /* In front of simple stuff */
+
+  opacity: 0;
+  transition: opacity 1500ms ease-in-out;
+}
+
+.active {
+  opacity: 1;
+}
+
+.active::before,
+.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%; /* Double width for looping */
+  height: 60%;
+  background: 
+    linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 25%, transparent 50%, rgba(255,255,255,0.3) 75%, transparent 100%);
+  background-size: 50% 100%;
+  filter: blur(20px);
+}
+
+.active::before {
+  animation: fogMove 25s linear infinite;
+  opacity: 0.5;
+}
+
+.active::after {
+  animation: fogMove 40s linear infinite reverse;
+  opacity: 0.3;
+  height: 80%;
+  bottom: 10%;
+}
+
+@keyframes fogMove {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

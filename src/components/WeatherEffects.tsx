@@ -1,7 +1,15 @@
 import { useMemo, useEffect } from 'react';
 import type { WeatherConfig } from '../services/config';
+import './WeatherEffects.css';
+import { Rain } from './weather/Rain';
+import { Sun } from './weather/Sun';
+import { Cloudy } from './weather/Cloudy';
+import { Snow } from './weather/Snow';
+import { Fog } from './weather/Fog';
+import { Lightning } from './weather/Lightning';
 
 export type WeatherEffectMode = 'clear' | 'cloudy' | 'rain' | 'thunder' | 'snow' | 'fog';
+
 
 // Open-Meteo weather codes:
 // https://open-meteo.com/en/docs
@@ -36,13 +44,25 @@ export function WeatherEffects({ weatherCode, enabled = true, onLog }: Props) {
 
   return (
     <div className={`weather-effects weather-${mode}`} aria-hidden data-weather-effect={mode}>
-      {/* Current weather effect: {mode} */}
-      <div className="weather-layer weather-vignette" />
-      <div className="weather-layer weather-sun" />
-      <div className="weather-layer weather-rain" />
-      <div className="weather-layer weather-fog" />
-      <div className="weather-layer weather-snow" />
-      <div className="weather-layer weather-lightning" />
+      {/* 
+          All Weather Components are fully isolated CSS Modules.
+          They receive an 'active' prop to handle their own transitions.
+      */}
+      
+      <Sun active={mode === 'clear'} />
+      
+      <Cloudy active={mode === 'cloudy'} />
+      
+      <Rain 
+        active={mode === 'rain' || mode === 'thunder'} 
+        intensity={mode === 'thunder' ? 'heavy' : 'moderate'}
+      />
+      
+      <Fog active={mode === 'fog'} />
+      
+      <Snow active={mode === 'snow'} />
+      
+      <Lightning active={mode === 'thunder'} />
     </div>
   );
 }

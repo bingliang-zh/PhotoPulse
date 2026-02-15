@@ -7,6 +7,7 @@ import { CryptoWidget } from './components/Crypto';
 import { DebugPanel, LogEntry, OnLogCallback } from './components/DebugPanel';
 import { loadConfig, AppConfig } from './services/config';
 import { WeatherEffects } from './components/WeatherEffects';
+import { Live2DModel } from './components/Live2DModel';
 
 function App() {
   const [time, setTime] = useState(new Date());
@@ -18,16 +19,26 @@ function App() {
   const [realWeatherCode, setRealWeatherCode] = useState<number | undefined>(undefined);
   const [testMode, setTestMode] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
+  const [showLive2D, setShowLive2D] = useState(true);
 
-  // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), snow(73), thunder(95)
-  const testWeatherCodes = [0, 3, 45, 61, 73, 95];
-  const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'snow', 'thunder'];
+  // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
+  const testWeatherCodes = [0, 3, 45, 61, 95, 73];
+  const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'thunder', 'snow'];
 
   const addLog: OnLogCallback = useCallback((message, type, action) => {
     setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);
   }, []);
 
-  // Test mode: cycle through weather codes every 2 seconds
+  const nextWeather = useCallback(() => {
+    if (!testMode) return;
+    const currentIndex = testWeatherCodes.indexOf(weatherCode ?? 0);
+    const nextIndex = (currentIndex + 1) % testWeatherCodes.length;
+    const code = testWeatherCodes[nextIndex];
+    addLog(`Test Mode: code=${code}, effect=${testWeatherNames[nextIndex]}`, 'info');
+    setWeatherCode(code);
+  }, [testMode, weatherCode, addLog]);
+
+  // Test mode: set initial weather code when entering test mode
   useEffect(() => {
     if (!testMode) {
       // Restore real weather code when test mode is off
@@ -37,18 +48,10 @@ function App() {
       }
       return;
     }
-    let index = 0;
-    addLog(`Test Mode: Starting weather cycle`, 'info');
+
+    // Set initial weather code when entering test mode
+    addLog(`Test Mode: Started - use Next to cycle through effects`, 'info');
     setWeatherCode(testWeatherCodes[0]);
-
-    const timer = setInterval(() => {
-      index = (index + 1) % testWeatherCodes.length;
-      const code = testWeatherCodes[index];
-      addLog(`Test Mode: code=${code}, effect=${testWeatherNames[index]}`, 'info');
-      setWeatherCode(code);
-    }, 2000);
-
-    return () => clearInterval(timer);
   }, [testMode, realWeatherCode, addLog]);
 
   useEffect(() => {
@@ -105,6 +108,14 @@ function App() {
         }} />
       )}
       <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} onLog={addLog} />
+      
+      {showLive2D && (
+        <Live2DModel 
+          modelPath="/live2d/shizuku/shizuku.model.json" 
+          onLog={addLog}
+        />
+      )}
+
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
@@ -145,8 +156,11 @@ function App() {
           onLog={addLog}
           testMode={testMode}
           onTestModeToggle={() => setTestMode(prev => !prev)}
+          onNextWeather={nextWeather}
           showBackground={showBackground}
           onBackgroundToggle={() => setShowBackground(prev => !prev)}
+          showLive2D={showLive2D}
+          onLive2DToggle={() => setShowLive2D(prev => !prev)}
         />
       )}
     </div>

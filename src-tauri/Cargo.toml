@@ -1,9 +1,11 @@
 [package]
-name = "tauri-app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+name = "photopulse"
+version = "0.2.0"
+description = "Repurpose your idle devices into a smart photo frame"
+authors = ["bingliang-zh"]
 edition = "2021"
+repository = "https://github.com/bingliang-zh/PhotoPulse"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -1,0 +1,62 @@
+/* Sun.module.css */
+
+.container {
+  /* Create a massive canvas centered roughly at Top-Right off-screen */
+  width: 300vmax;
+  height: 300vmax;
+  position: absolute;
+  /* Center of the canvas is targeted here */
+  left: 75%;
+  top: -50%;
+  /* Shift back by half dimensions to actually center it */
+  margin-left: -150vmax;
+  margin-top: -150vmax;
+  
+  background:
+    /* Central warm glow - Center of canvas */
+    radial-gradient(circle at center, rgba(255, 230, 160, 0.6) 0%, transparent 40%),
+    /* The God Rays - Center of canvas */
+    repeating-conic-gradient(
+      from 0deg at center, 
+      transparent 0deg, 
+      rgba(255, 255, 255, 0.12) 5deg, 
+      transparent 10deg,
+      rgba(255, 255, 255, 0.08) 15deg,
+      transparent 20deg
+    );
+  mix-blend-mode: overlay;
+  filter: blur(20px); /* Increased blur for smoother massive blending */
+  z-index: 2;
+  
+  /* Strictly hidden by default */
+  visibility: hidden; 
+  opacity: 0;
+  transition: opacity 1500ms ease-in-out;
+
+  /* Animation: Rotate the whole canvas, scale breathing */
+  animation: sunCanvasAnim 40s ease-in-out infinite alternate;
+}
+
+.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+@keyframes sunCanvasAnim {
+  0% { 
+    transform: rotate(0deg) scale(1) translate(0, 0); 
+    opacity: 0.8; 
+  }
+  33% {
+    transform: rotate(10deg) scale(1.1) translate(2%, 2%);
+    opacity: 1;
+  }
+  66% {
+    transform: rotate(-5deg) scale(1.05) translate(-2%, 1%);
+    opacity: 0.9;
+  }
+  100% { 
+    transform: rotate(5deg) scale(1.15) translate(0, 3%); 
+    opacity: 0.85; 
+  }
+}
