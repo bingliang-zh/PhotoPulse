@@ -41,14 +41,17 @@ case "$ACTION" in
       sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json src-tauri/tauri.conf.json
     fi
 
-    # Commit and push
+    # Commit changes
     git add src-tauri/Cargo.toml package.json src-tauri/tauri.conf.json
     git commit -m "chore: bump version to $VERSION"
-    git push -u origin "$BRANCH"
 
     echo ""
-    echo "✓ Release branch '$BRANCH' created and pushed"
-    echo "→ Create a PR to merge into main, then run: pnpm release $VERSION tag"
+    echo "✓ Release branch '$BRANCH' created"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Push the branch:  git push -u origin $BRANCH"
+    echo "  2. Create a PR to merge into main"
+    echo "  3. After merge, run: pnpm release $VERSION tag"
     ;;
 
   tag)
@@ -61,13 +64,16 @@ case "$ACTION" in
 
     git pull
 
-    # Create and push tag
+    # Create tag
     git tag "v$VERSION"
-    git push origin "v$VERSION"
 
     echo ""
-    echo "✓ Tag v$VERSION created and pushed"
-    echo "→ GitHub Actions will now build and create a draft release"
+    echo "✓ Tag v$VERSION created"
+    echo ""
+    echo "Next step:"
+    echo "  Push the tag:  git push origin v$VERSION"
+    echo ""
+    echo "After push, GitHub Actions will build and create a draft release"
     ;;
 
   *)
