@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import { Carousel } from './components/Carousel';
 import { Weather } from './components/Weather';
@@ -6,6 +6,7 @@ import { Stock } from './components/Stock';
 import { CryptoWidget } from './components/Crypto';
 import { DebugPanel, LogEntry, OnLogCallback } from './components/DebugPanel';
 import { loadConfig, AppConfig } from './services/config';
+import { WeatherEffects } from './components/WeatherEffects';
 
 function App() {
   const [time, setTime] = useState(new Date());
@@ -13,10 +14,43 @@ function App() {
   const [hasImages, setHasImages] = useState(true);
   const [debugVisible, setDebugVisible] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [weatherCode, setWeatherCode] = useState<number | undefined>(undefined);
+  const [realWeatherCode, setRealWeatherCode] = useState<number | undefined>(undefined);
+  const [testMode, setTestMode] = useState(false);
+  const [showBackground, setShowBackground] = useState(true);
 
-  const addLog: OnLogCallback = (message, type, action) => {
+  // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
+  const testWeatherCodes = [0, 3, 45, 61, 95, 73];
+  const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'thunder', 'snow'];
+
+  const addLog: OnLogCallback = useCallback((message, type, action) => {
     setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);
-  };
+  }, []);
+
+  const nextWeather = useCallback(() => {
+    if (!testMode) return;
+    const currentIndex = testWeatherCodes.indexOf(weatherCode ?? 0);
+    const nextIndex = (currentIndex + 1) % testWeatherCodes.length;
+    const code = testWeatherCodes[nextIndex];
+    addLog(`Test Mode: code=${code}, effect=${testWeatherNames[nextIndex]}`, 'info');
+    setWeatherCode(code);
+  }, [testMode, weatherCode, addLog]);
+
+  // Test mode: set initial weather code when entering test mode
+  useEffect(() => {
+    if (!testMode) {
+      // Restore real weather code when test mode is off
+      if (realWeatherCode !== undefined) {
+        setWeatherCode(realWeatherCode);
+        addLog(`Test Mode: Restored real weather code=${realWeatherCode}`, 'info');
+      }
+      return;
+    }
+
+    // Set initial weather code when entering test mode
+    addLog(`Test Mode: Started - use Next to cycle through effects`, 'info');
+    setWeatherCode(testWeatherCodes[0]);
+  }, [testMode, realWeatherCode, addLog]);
 
   useEffect(() => {
     addLog('App: Initializing...', 'info');
@@ -53,11 +87,38 @@ function App() {
 
   return (
     <div className="container">
-      <Carousel interval={config.interval} onStateChange={setHasImages} onLog={addLog} />
+      {showBackground && (
+        <Carousel
+          interval={config.interval}
+          onStateChange={setHasImages}
+          onLog={addLog}
+        />
+      )}
+      {!showBackground && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: -1,
+          background: '#1a1a1a'
+        }} />
+      )}
+      <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} onLog={addLog} />
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
-            <Weather location={config.weather} onLog={addLog} />
+            <Weather
+              location={config.weather}
+              onLog={addLog}
+              onWeatherCode={(code) => {
+                setRealWeatherCode(code);
+                if (!testMode) {
+                  setWeatherCode(code);
+                }
+              }}
+            />
           )}
           {config.stocks && config.stocks.length > 0 && (
             <Stock symbols={config.stocks} onLog={addLog} />
@@ -66,13 +127,30 @@ function App() {
             <CryptoWidget symbols={config.crypto} onLog={addLog} />
           )}
         </div>
-        <div className="time-display" style={{ marginTop: '5vh' }}>
-          <h1>{time.toLocaleTimeString('en-US', { hour12: false })}</h1>
-          <h2>{time.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</h2>
-          <h3>{time.toLocaleDateString('en-US', { weekday: 'long' })}</h3>
+        <div className="time-display" style={{ marginTop: "5vh" }}>
+          <h1>{time.toLocaleTimeString("en-US", { hour12: false })}</h1>
+          <h2>
+            {time.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </h2>
+          <h3>{time.toLocaleDateString("en-US", { weekday: "long" })}</h3>
         </div>
       </div>
-      {debugVisible && <DebugPanel onClose={() => setDebugVisible(false)} logs={logs} onLog={addLog} />}
+      {debugVisible && (
+        <DebugPanel
+          onClose={() => setDebugVisible(false)}
+          logs={logs}
+          onLog={addLog}
+          testMode={testMode}
+          onTestModeToggle={() => setTestMode(prev => !prev)}
+          onNextWeather={nextWeather}
+          showBackground={showBackground}
+          onBackgroundToggle={() => setShowBackground(prev => !prev)}
+        />
+      )}
     </div>
   );
 }

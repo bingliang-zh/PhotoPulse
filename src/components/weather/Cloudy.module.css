@@ -1,0 +1,75 @@
+/* Cloudy.module.css */
+
+.container {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1500ms ease-in-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.active {
+  opacity: 1;
+}
+
+/* Layer 1: The heavy cloud base (Slow drift) */
+.active::before {
+  content: "";
+  position: absolute;
+  top: -20vh; /* Start higher up */
+  left: -20%;
+  width: 140%;
+  /* Increase container height so we can draw "long" clouds without clipping */
+  height: 70vh; 
+  
+  background: 
+    /* 1. Use Ellipses to force vertical shapes */
+    /* Deep Drooping Cloud (Left) - Hangs low */
+    radial-gradient(ellipse 25vw 40vh at 20% 45%, rgba(220, 230, 240, 0.8) 0%, transparent 70%),
+    
+    /* 2. Higher Recessed Gap (Center-Left) - Much higher "cave" */
+    radial-gradient(circle 25vh at 40% 10%, rgba(200, 215, 225, 0.5) 0%, transparent 60%),
+    
+    /* 3. Massive Main Cloud (Center-Right) - Raised from 60% to 40% to be less intrusive */
+    radial-gradient(ellipse 35vw 45vh at 65% 40%, rgba(215, 225, 235, 0.85) 0%, transparent 70%),
+    
+    /* 4. Medium Cloud (Far Right) */
+    radial-gradient(circle 30vh at 90% 35%, rgba(210, 220, 230, 0.7) 0%, transparent 60%);
+    
+  /* Restored heavier blur */
+  filter: blur(45px);
+  opacity: 0.9;
+  z-index: 1;
+  animation: cloudDriftDeep 60s ease-in-out infinite alternate;
+}
+
+/* Layer 2: Lighter mist/highlights (Faster drift) */
+.active::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  left: -10%;
+  width: 120%;
+  height: 30vh;
+  
+  background: 
+    radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 40%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+    
+  filter: blur(30px);
+  mix-blend-mode: overlay;
+  z-index: 2;
+  animation: cloudDriftSurface 35s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes cloudDriftDeep {
+  0% { transform: translateX(-4%) translateY(0) scale(1); }
+  50% { transform: translateX(2%) translateY(1%) scale(1.02); }
+  100% { transform: translateX(6%) translateY(2%) scale(1.05); }
+}
+
+@keyframes cloudDriftSurface {
+  0% { transform: translateX(-8%) translateY(-2%) scale(0.95); opacity: 0.8; }
+  100% { transform: translateX(8%) translateY(2%) scale(1.1); opacity: 1; }
+}

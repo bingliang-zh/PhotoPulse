@@ -1,0 +1,24 @@
+/* Rain.module.css */
+
+/* The main container for the Rain effect */
+.container {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+
+  /* Transition Logic (Always mounted, fade in/out) */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1s ease, visibility 1s ease;
+  mix-blend-mode: normal;
+
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 100;
+}

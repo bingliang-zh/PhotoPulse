@@ -1,0 +1,15 @@
+/* WeatherEffects.css */
+
+/*
+   Weather background effects overlay container
+   Grid layout or shared structural styles go here.
+   Specific weather styles are now in src/components/weather/*.module.css
+*/
+
+.weather-effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}

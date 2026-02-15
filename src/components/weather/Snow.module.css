@@ -1,0 +1,58 @@
+/* Snow.module.css */
+
+.container {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1500ms ease-in-out;
+}
+
+.active {
+  opacity: 1;
+}
+
+.active::before,
+.active::after {
+  content: "";
+  position: absolute;
+  inset: -100% 0 0 0;
+  background-image: 
+    radial-gradient(3px 3px at 20% 30%, white 50%, transparent 100%),
+    radial-gradient(3px 3px at 40% 70%, white 50%, transparent 100%),
+    radial-gradient(3px 3px at 60% 20%, white 50%, transparent 100%),
+    radial-gradient(4px 4px at 80% 40%, rgba(255,255,255,0.8) 50%, transparent 100%),
+    radial-gradient(3px 3px at 10% 80%, white 50%, transparent 100%);
+  background-size: 400px 400px;
+  opacity: 0;
+}
+
+/* Layer 1: Close/Bright */
+.active::before {
+  /* Background Size 400px. Move 400px in 5s = 80px/s */
+  animation: snowFallBefore 5s linear infinite;
+  opacity: 0.9;
+  z-index: 2;
+}
+
+/* Layer 2: Far/Blurry/Slow */
+.active::after {
+  background-size: 300px 300px;
+  filter: blur(2px);
+  /* Background Size 300px. Move 300px in 7.5s = 40px/s */
+  animation: snowFallAfter 7.5s linear infinite;
+  opacity: 0.6;
+  z-index: 1;
+  transform: scale(0.8);
+}
+
+@keyframes snowFallBefore {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 400px; }
+}
+
+@keyframes snowFallAfter {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 300px; }
+}

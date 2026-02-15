@@ -4,7 +4,7 @@ import { WidgetContainer } from './WidgetContainer';
 
 interface StockProps {
   symbols: string[];
-  onLog?: (message: string, type: 'info' | 'warn' | 'error', action?: { label: string, handler: () => void }) => void;
+  onLog?: (message: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void;
 }
 
 export const Stock = ({ symbols, onLog }: StockProps) => {
