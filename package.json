@@ -20,6 +20,8 @@
     "@types/three": "^0.182.0",
     "axios": "^1.13.2",
     "framer-motion": "^12.23.24",
+    "pixi-live2d-display-lipsyncpatch": "0.5.0-ls-8",
+    "pixi.js": "^7.4.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "three": "^0.182.0"

@@ -7,6 +7,7 @@ import { CryptoWidget } from './components/Crypto';
 import { DebugPanel, LogEntry, OnLogCallback } from './components/DebugPanel';
 import { loadConfig, AppConfig } from './services/config';
 import { WeatherEffects } from './components/WeatherEffects';
+import { Live2DModel } from './components/Live2DModel';
 
 function App() {
   const [time, setTime] = useState(new Date());
@@ -18,6 +19,7 @@ function App() {
   const [realWeatherCode, setRealWeatherCode] = useState<number | undefined>(undefined);
   const [testMode, setTestMode] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
+  const [showLive2D, setShowLive2D] = useState(true);
 
   // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
   const testWeatherCodes = [0, 3, 45, 61, 95, 73];
@@ -106,6 +108,14 @@ function App() {
         }} />
       )}
       <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} onLog={addLog} />
+      
+      {showLive2D && (
+        <Live2DModel 
+          modelPath="/live2d/shizuku/shizuku.model.json" 
+          onLog={addLog}
+        />
+      )}
+
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
@@ -149,6 +159,8 @@ function App() {
           onNextWeather={nextWeather}
           showBackground={showBackground}
           onBackgroundToggle={() => setShowBackground(prev => !prev)}
+          showLive2D={showLive2D}
+          onLive2DToggle={() => setShowLive2D(prev => !prev)}
         />
       )}
     </div>
