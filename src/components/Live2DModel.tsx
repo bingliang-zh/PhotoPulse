@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
-import { Live2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism2';
+import { Live2DModel as PIXILive2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism2';
 
 interface Live2DModelProps {
   modelPath: string;
@@ -11,20 +11,23 @@ interface Live2DModelProps {
   y?: number;
 }
 
-export function Live2DModelComponent({
+export function Live2DModel({
   modelPath,
   width = 300,
   height = 400,
   scale = 0.15,
   x = 150,
   y = 250,
-}: Live2DModelProps) {
+  onLog,
+}: Live2DModelProps & { onLog?: (msg: string, type: 'info' | 'warn' | 'error') => void }) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<PIXI.Application | null>(null);
   const modelRef = useRef<any>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
+
+    onLog?.('Live2D: Initializing model...', 'info');
 
     // 创建 PIXI Application
     const app = new PIXI.Application({
@@ -39,7 +42,7 @@ export function Live2DModelComponent({
     appRef.current = app;
 
     // 加载 Live2D 模型
-    Live2DModel.from(modelPath)
+    PIXILive2DModel.from(modelPath)
       .then((model: any) => {
         modelRef.current = model;
         app.stage.addChild(model);
@@ -51,7 +54,7 @@ export function Live2DModelComponent({
 
         // 启用自动交互
         model.on('hit', (hitAreas: string[]) => {
-          console.log('Live2D hit:', hitAreas);
+          onLog?.(`Live2D hit: ${hitAreas.join(', ')}`, 'info');
           if (hitAreas.includes('body')) {
             model.motion('tap_body');
           } else if (hitAreas.includes('head')) {
@@ -62,10 +65,10 @@ export function Live2DModelComponent({
         // 启动空闲动画
         model.motion('idle');
 
-        console.log('Live2D Shizuku model loaded successfully');
+        onLog?.('Live2D: Shizuku model loaded successfully', 'info');
       })
       .catch((error: Error) => {
-        console.error('Failed to load Live2D model:', error);
+        onLog?.(`Live2D: Failed to load model: ${error.message}`, 'error');
       });
 
     // 清理函数
@@ -77,7 +80,7 @@ export function Live2DModelComponent({
         appRef.current.destroy(true, { children: true });
       }
     };
-  }, [modelPath, width, height, scale, x, y]);
+  }, [modelPath, width, height, scale, x, y, onLog]);
 
   return (
     <div
@@ -85,7 +88,10 @@ export function Live2DModelComponent({
       style={{
         width: `${width}px`,
         height: `${height}px`,
-        position: 'relative',
+        position: 'absolute',
+        bottom: '0',
+        right: '0',
+        zIndex: 15,
         pointerEvents: 'auto',
       }}
     />
