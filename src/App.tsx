@@ -5,7 +5,7 @@ import { Weather } from './components/Weather';
 import { Stock } from './components/Stock';
 import { CryptoWidget } from './components/Crypto';
 import { DebugPanel, LogEntry, OnLogCallback } from './components/DebugPanel';
-import { loadConfig, AppConfig } from './services/config';
+import { loadConfig, AppConfig, EffectsQuality } from './services/config';
 import { WeatherEffects } from './components/WeatherEffects';
 
 function App() {
@@ -18,6 +18,7 @@ function App() {
   const [realWeatherCode, setRealWeatherCode] = useState<number | undefined>(undefined);
   const [testMode, setTestMode] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
+  const [effectsQuality, setEffectsQuality] = useState<EffectsQuality>(3);
 
   // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
   const testWeatherCodes = [0, 3, 45, 61, 95, 73];
@@ -78,6 +79,9 @@ function App() {
   useEffect(() => {
     loadConfig(addLog).then(cfg => {
       setConfig(cfg);
+      if (cfg.effectsQuality) {
+        setEffectsQuality(cfg.effectsQuality);
+      }
     }).catch(err => {
       addLog(`App: Config load failed: ${err}`, 'error');
     });
@@ -105,7 +109,7 @@ function App() {
           background: '#1a1a1a'
         }} />
       )}
-      <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} onLog={addLog} />
+      <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} onLog={addLog} effectsQuality={effectsQuality} />
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
@@ -149,6 +153,8 @@ function App() {
           onNextWeather={nextWeather}
           showBackground={showBackground}
           onBackgroundToggle={() => setShowBackground(prev => !prev)}
+          effectsQuality={effectsQuality}
+          onEffectsQualityChange={setEffectsQuality}
         />
       )}
     </div>
