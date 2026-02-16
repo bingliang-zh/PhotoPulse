@@ -7,6 +7,7 @@ import { CryptoWidget } from './components/Crypto';
 import { DebugPanel, LogEntry, OnLogCallback } from './components/DebugPanel';
 import { loadConfig, AppConfig, EffectsQuality } from './services/config';
 import { WeatherEffects } from './components/WeatherEffects';
+import { checkWebGLSupport } from './utils/system';
 
 function App() {
   const [time, setTime] = useState(new Date());
@@ -19,6 +20,7 @@ function App() {
   const [testMode, setTestMode] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
   const [effectsQuality, setEffectsQuality] = useState<EffectsQuality>(EffectsQuality.Standard);
+  const [weatherEnabled, setWeatherEnabled] = useState(true);
 
   // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
   const testWeatherCodes = [0, 3, 45, 61, 95, 73];
@@ -79,9 +81,16 @@ function App() {
   useEffect(() => {
     loadConfig(addLog).then(cfg => {
       setConfig(cfg);
-      if (cfg.effectsQuality) {
-        setEffectsQuality(cfg.effectsQuality);
+      
+      let initialQuality = cfg.effectsQuality ?? EffectsQuality.Standard;
+      
+      // Auto-downgrade if WebGL is missing
+      if (initialQuality > EffectsQuality.CSS && !checkWebGLSupport()) {
+        addLog('WebGL not supported or context creation failed. Falling back to CSS effects.', 'warn');
+        initialQuality = EffectsQuality.CSS;
       }
+      
+      setEffectsQuality(initialQuality);
     }).catch(err => {
       addLog(`App: Config load failed: ${err}`, 'error');
     });
@@ -109,7 +118,13 @@ function App() {
           background: '#1a1a1a'
         }} />
       )}
-      <WeatherEffects weatherCode={weatherCode} enabled={!!config.weather} onLog={addLog} effectsQuality={effectsQuality} />
+      {weatherEnabled && config.weather && (
+        <WeatherEffects 
+          weatherCode={weatherCode} 
+          onLog={addLog} 
+          effectsQuality={effectsQuality} 
+        />
+      )}
       <div className="dashboard">
         <div className="widget-column">
           {config.weather && config.weather.city && (
@@ -153,6 +168,11 @@ function App() {
           onNextWeather={nextWeather}
           showBackground={showBackground}
           onBackgroundToggle={() => setShowBackground(prev => !prev)}
+          weatherEnabled={weatherEnabled}
+          onWeatherEnabledToggle={() => {
+            setWeatherEnabled(prev => !prev);
+            addLog(`Weather effects manually ${!weatherEnabled ? 'enabled' : 'disabled'}`, 'info');
+          }}
           effectsQuality={effectsQuality}
           onEffectsQualityChange={setEffectsQuality}
         />

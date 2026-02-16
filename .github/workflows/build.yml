@@ -52,7 +52,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__ # simplified tag name
+          # 只有在推送 v* 标签或手动触发时才创建/更新 Release
+          # 如果 tagName 为空字符串，action 将只构建而不发布
+          tagName: ${{ (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') && 'v__VERSION__' || '' }}
           releaseName: "PhotoPulse v__VERSION__"
           releaseBody: "PhotoPulse Official Release. Repurpose your idle devices into a smart photo frame."
           releaseDraft: true
