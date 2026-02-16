@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { openFolderWithLogs } from '../utils/system';
-import type { EffectsQuality } from '../services/config';
+import { EffectsQuality, QUALITY_LABELS } from '../services/config';
 
 export interface LogEntry {
     message: string;
@@ -13,14 +13,6 @@ export interface LogEntry {
 }
 
 export type OnLogCallback = (message: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void;
-
-const QUALITY_LABELS: Record<EffectsQuality, string> = {
-  1: 'Low (CSS)',
-  2: 'Medium',
-  3: 'High',
-  4: 'Ultra',
-  5: 'Max'
-};
 
 interface DebugPanelProps {
     logs: LogEntry[];
@@ -35,7 +27,7 @@ interface DebugPanelProps {
     onEffectsQualityChange?: (quality: EffectsQuality) => void;
 }
 
-export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, onNextWeather, showBackground, onBackgroundToggle, effectsQuality = 3, onEffectsQualityChange }: DebugPanelProps) => {
+export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, onNextWeather, showBackground, onBackgroundToggle, effectsQuality = EffectsQuality.Standard, onEffectsQualityChange }: DebugPanelProps) => {
     const [verbose, setVerbose] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
     const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -192,7 +184,7 @@ export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, o
                             <input
                                 type="range"
                                 min="1"
-                                max="5"
+                                max="4"
                                 value={effectsQuality}
                                 onChange={(e) => {
                                     const newQuality = parseInt(e.target.value) as EffectsQuality;

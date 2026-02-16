@@ -8,8 +8,20 @@ export interface WeatherConfig {
     longitude?: number;
 }
 
-// Effects quality: 1=Low (CSS), 2=Medium, 3=High, 4=Ultra, 5=Max
-export type EffectsQuality = 1 | 2 | 3 | 4 | 5;
+// Effects quality levels
+export enum EffectsQuality {
+    CSS = 1,
+    Standard = 2,
+    High = 3,
+    Ultra = 4
+}
+
+export const QUALITY_LABELS: Record<EffectsQuality, string> = {
+    [EffectsQuality.CSS]: 'CSS',
+    [EffectsQuality.Standard]: 'Standard',
+    [EffectsQuality.High]: 'High',
+    [EffectsQuality.Ultra]: 'Ultra'
+};
 
 export interface AppConfig {
     stocks?: string[];
@@ -22,7 +34,7 @@ export interface AppConfig {
 const DEFAULT_STOCKS = ['NVDA', 'AAPL', 'GOOGL', 'MSFT', 'AVGO', 'AMD', 'QQQ', 'IREN', 'TSM'];
 const DEFAULT_CRYPTO = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XMR-USD'];
 const DEFAULT_INTERVAL = 30;
-const DEFAULT_EFFECTS_QUALITY: EffectsQuality = 3;
+const DEFAULT_EFFECTS_QUALITY = EffectsQuality.High;
 const DEFAULT_WEATHER = {
     city: "Hangzhou",
     latitude: 30.2748,

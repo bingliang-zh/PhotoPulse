@@ -18,7 +18,7 @@ function App() {
   const [realWeatherCode, setRealWeatherCode] = useState<number | undefined>(undefined);
   const [testMode, setTestMode] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
-  const [effectsQuality, setEffectsQuality] = useState<EffectsQuality>(3);
+  const [effectsQuality, setEffectsQuality] = useState<EffectsQuality>(EffectsQuality.Standard);
 
   // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
   const testWeatherCodes = [0, 3, 45, 61, 95, 73];

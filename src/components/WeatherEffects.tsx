@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import type { WeatherConfig, EffectsQuality } from '../services/config';
+import { WeatherConfig, EffectsQuality } from '../services/config';
 import './WeatherEffects.css';
 import { Rain } from './weather/Rain';
 import { Sun } from './weather/Sun';
@@ -33,7 +33,7 @@ type Props = {
   effectsQuality?: EffectsQuality;
 };
 
-export function WeatherEffects({ weatherCode, enabled = true, onLog, effectsQuality = 3 }: Props) {
+export function WeatherEffects({ weatherCode, enabled = true, onLog, effectsQuality = EffectsQuality.Standard }: Props) {
   const mode = useMemo(() => {
     if (!enabled || weatherCode === undefined || weatherCode === null) return 'clear' as WeatherEffectMode;
     return mapWeatherCodeToEffect(weatherCode);

@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import styles from './Rain.module.css';
-import type { EffectsQuality } from '../../services/config';
+import { EffectsQuality } from '../../services/config';
 
 type Props = {
   active: boolean;
@@ -14,7 +14,7 @@ type Props = {
 
 // Performance tier configurations
 const QUALITY_CONFIG = {
-  1: { // CSS only - no 3D
+  [EffectsQuality.CSS]: { // CSS only - no 3D
     rainCount: 0,
     windowDrops: 0,
     useEnvMap: false,
@@ -22,15 +22,7 @@ const QUALITY_CONFIG = {
     dpr: 1,
     geometryDetail: { cap: 2, radial: 4, sphere: 6 }
   },
-  2: { // Low
-    rainCount: 30,
-    windowDrops: 8,
-    useEnvMap: false,
-    material: 'basic',
-    dpr: 1,
-    geometryDetail: { cap: 2, radial: 4, sphere: 6 }
-  },
-  3: { // Medium
+  [EffectsQuality.Standard]: {
     rainCount: 50,
     windowDrops: 12,
     useEnvMap: false,
@@ -38,17 +30,17 @@ const QUALITY_CONFIG = {
     dpr: 1,
     geometryDetail: { cap: 3, radial: 6, sphere: 8 }
   },
-  4: { // High
-    rainCount: 80,
-    windowDrops: 20,
+  [EffectsQuality.High]: {
+    rainCount: 50,
+    windowDrops: 12,
     useEnvMap: false,
     material: 'physical',
     dpr: 1,
     geometryDetail: { cap: 4, radial: 8, sphere: 10 }
   },
-  5: { // Ultra
-    rainCount: 100,
-    windowDrops: 20,
+  [EffectsQuality.Ultra]: {
+    rainCount: 50,
+    windowDrops: 12,
     useEnvMap: true,
     material: 'physical',
     dpr: [1, 2] as [number, number],
@@ -323,7 +315,7 @@ const WindowDrops: React.FC<{
 };
 
 /**
- * CSS-only rain fallback for quality=1
+ * CSS-only rain fallback for EffectsQuality.CSS
  */
 const CSSRain: React.FC<{ intensity: 'moderate' | 'heavy' }> = ({ intensity }) => {
   const dropCount = intensity === 'heavy' ? 60 : 40;
@@ -346,7 +338,7 @@ const CSSRain: React.FC<{ intensity: 'moderate' | 'heavy' }> = ({ intensity }) =
   );
 };
 
-export const Rain: React.FC<Props> = ({ active, count, intensity = 'moderate', quality = 3 }) => {
+export const Rain: React.FC<Props> = ({ active, count, intensity = 'moderate', quality = EffectsQuality.Standard }) => {
   const config = QUALITY_CONFIG[quality];
   
   // Base counts from config, adjusted for intensity
@@ -359,8 +351,8 @@ export const Rain: React.FC<Props> = ({ active, count, intensity = 'moderate', q
     return null;
   }
 
-  // Quality 1: CSS-only fallback
-  if (quality === 1) {
+  // Quality CSS: CSS-only fallback
+  if (quality === EffectsQuality.CSS) {
     return (
       <div 
         className={`${styles.container} ${styles.active}`}
@@ -379,10 +371,9 @@ export const Rain: React.FC<Props> = ({ active, count, intensity = 'moderate', q
       {/* R3F Canvas */}
       <Canvas 
         camera={{ position: [0, 0, 20], fov: 60 }}
-        gl={{ alpha: true, antialias: quality >= 4 }}
+        gl={{ alpha: true, antialias: quality >= EffectsQuality.Ultra }}
         dpr={config.dpr}
         style={{ pointerEvents: 'none', background: 'transparent' }}
-        frameloop={quality <= 2 ? 'demand' : 'always'}
       >
         <ambientLight intensity={2} />
         <directionalLight position={[10, 10, 5]} intensity={5} color="#ffffff" />
