@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import { WeatherConfig, EffectsQuality } from '../services/config';
+import { EffectsQuality } from '../services/config';
 import './WeatherEffects.css';
 import { Rain } from './weather/Rain';
 import { Sun } from './weather/Sun';
