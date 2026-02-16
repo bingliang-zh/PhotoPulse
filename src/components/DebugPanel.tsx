@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { openFolderWithLogs } from '../utils/system';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { openFolderWithLogs, checkWebGLSupport } from '../utils/system';
 import { EffectsQuality, QUALITY_LABELS } from '../services/config';
+
+export const APP_VERSION = "0.2.0"; // From package.json
 
 export interface LogEntry {
     message: string;
@@ -23,14 +25,18 @@ interface DebugPanelProps {
     onNextWeather?: () => void;
     showBackground?: boolean;
     onBackgroundToggle?: () => void;
+    weatherEnabled?: boolean;
+    onWeatherEnabledToggle?: () => void;
     effectsQuality?: EffectsQuality;
     onEffectsQualityChange?: (quality: EffectsQuality) => void;
 }
 
-export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, onNextWeather, showBackground, onBackgroundToggle, effectsQuality = EffectsQuality.Standard, onEffectsQualityChange }: DebugPanelProps) => {
+export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, onNextWeather, showBackground, onBackgroundToggle, weatherEnabled = true, onWeatherEnabledToggle, effectsQuality = EffectsQuality.Standard, onEffectsQualityChange }: DebugPanelProps) => {
     const [verbose, setVerbose] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
     const logsContainerRef = useRef<HTMLDivElement>(null);
+
+    const hasWebGL = useMemo(() => checkWebGLSupport(), []);
 
     const openConfigFolder = () => openFolderWithLogs(undefined, (msg, type) => onLog(msg, type));
 
@@ -86,6 +92,7 @@ export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, o
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <span style={{ color: '#fff', fontWeight: 'bold' }}>Debug Panel: <span style={{ color: '#888', fontWeight: 'normal', fontSize: '0.8rem' }}>(Press ` to toggle)</span></span>
+                    <span style={{ color: '#555', fontSize: '0.8rem' }}>version={APP_VERSION}</span>
 
                     <button
                         onClick={openConfigFolder}
@@ -170,6 +177,23 @@ export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, o
                         </button>
                     )}
 
+                    {onWeatherEnabledToggle && (
+                        <button
+                            onClick={onWeatherEnabledToggle}
+                            style={{
+                                padding: '4px 12px',
+                                fontSize: '0.8rem',
+                                background: weatherEnabled ? '#3b82f6' : '#333',
+                                color: weatherEnabled ? '#fff' : '#888',
+                                border: `1px solid ${weatherEnabled ? '#60a5fa' : '#555'}`,
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Weather Effects {weatherEnabled ? 'Enabled' : 'Disabled'}
+                        </button>
+                    )}
+
                     {onEffectsQualityChange && (
                         <div style={{ 
                             display: 'flex', 
@@ -178,14 +202,17 @@ export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, o
                             padding: '4px 12px',
                             background: '#333',
                             borderRadius: '4px',
-                            border: '1px solid #555'
+                            border: '1px solid #555',
+                            opacity: weatherEnabled ? 1 : 0.5,
+                            pointerEvents: weatherEnabled ? 'auto' : 'none'
                         }}>
                             <span style={{ fontSize: '0.8rem', color: '#888' }}>Effects:</span>
                             <input
                                 type="range"
                                 min="1"
-                                max="4"
+                                max={hasWebGL ? "4" : "1"}
                                 value={effectsQuality}
+                                title={hasWebGL ? QUALITY_LABELS[effectsQuality] : "WebGL not supported - locked to CSS"}
                                 onChange={(e) => {
                                     const newQuality = parseInt(e.target.value) as EffectsQuality;
                                     onEffectsQualityChange(newQuality);
@@ -194,16 +221,18 @@ export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, o
                                 style={{
                                     width: '80px',
                                     height: '4px',
-                                    cursor: 'pointer',
-                                    accentColor: '#8b5cf6'
+                                    cursor: (hasWebGL && weatherEnabled) ? 'pointer' : 'not-allowed',
+                                    accentColor: '#8b5cf6',
+                                    opacity: hasWebGL ? 1 : 0.5
                                 }}
                             />
                             <span style={{ 
                                 fontSize: '0.75rem', 
-                                color: '#a78bfa',
+                                color: hasWebGL ? '#a78bfa' : '#ff5252',
                                 minWidth: '70px'
                             }}>
                                 {QUALITY_LABELS[effectsQuality]}
+                                {!hasWebGL && " (No WebGL)"}
                             </span>
                         </div>
                     )}
