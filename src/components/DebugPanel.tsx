@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { openFolderWithLogs } from '../utils/system';
+import { EffectsQuality, QUALITY_LABELS } from '../services/config';
 
 export interface LogEntry {
     message: string;
@@ -22,9 +23,11 @@ interface DebugPanelProps {
     onNextWeather?: () => void;
     showBackground?: boolean;
     onBackgroundToggle?: () => void;
+    effectsQuality?: EffectsQuality;
+    onEffectsQualityChange?: (quality: EffectsQuality) => void;
 }
 
-export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, onNextWeather, showBackground, onBackgroundToggle }: DebugPanelProps) => {
+export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, onNextWeather, showBackground, onBackgroundToggle, effectsQuality = EffectsQuality.Standard, onEffectsQualityChange }: DebugPanelProps) => {
     const [verbose, setVerbose] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
     const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -165,6 +168,44 @@ export const DebugPanel = ({ logs, onClose, onLog, testMode, onTestModeToggle, o
                         >
                             Background {showBackground ? 'ON' : 'OFF'}
                         </button>
+                    )}
+
+                    {onEffectsQualityChange && (
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px',
+                            padding: '4px 12px',
+                            background: '#333',
+                            borderRadius: '4px',
+                            border: '1px solid #555'
+                        }}>
+                            <span style={{ fontSize: '0.8rem', color: '#888' }}>Effects:</span>
+                            <input
+                                type="range"
+                                min="1"
+                                max="4"
+                                value={effectsQuality}
+                                onChange={(e) => {
+                                    const newQuality = parseInt(e.target.value) as EffectsQuality;
+                                    onEffectsQualityChange(newQuality);
+                                    onLog(`Effects quality changed to: ${QUALITY_LABELS[newQuality]}`, 'info');
+                                }}
+                                style={{
+                                    width: '80px',
+                                    height: '4px',
+                                    cursor: 'pointer',
+                                    accentColor: '#8b5cf6'
+                                }}
+                            />
+                            <span style={{ 
+                                fontSize: '0.75rem', 
+                                color: '#a78bfa',
+                                minWidth: '70px'
+                            }}>
+                                {QUALITY_LABELS[effectsQuality]}
+                            </span>
+                        </div>
                     )}
                 </div>
 

@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react';
-import type { WeatherConfig } from '../services/config';
+import { WeatherConfig, EffectsQuality } from '../services/config';
 import './WeatherEffects.css';
 import { Rain } from './weather/Rain';
 import { Sun } from './weather/Sun';
@@ -30,9 +30,10 @@ type Props = {
   onLog?: (message: string, type: 'info' | 'warn' | 'error' | 'debug') => void;
   // for future: location-based day/night, intensity, etc.
   location?: WeatherConfig;
+  effectsQuality?: EffectsQuality;
 };
 
-export function WeatherEffects({ weatherCode, enabled = true, onLog }: Props) {
+export function WeatherEffects({ weatherCode, enabled = true, onLog, effectsQuality = EffectsQuality.Standard }: Props) {
   const mode = useMemo(() => {
     if (!enabled || weatherCode === undefined || weatherCode === null) return 'clear' as WeatherEffectMode;
     return mapWeatherCodeToEffect(weatherCode);
@@ -56,6 +57,7 @@ export function WeatherEffects({ weatherCode, enabled = true, onLog }: Props) {
       <Rain 
         active={mode === 'rain' || mode === 'thunder'} 
         intensity={mode === 'thunder' ? 'heavy' : 'moderate'}
+        quality={effectsQuality}
       />
       
       <Fog active={mode === 'fog'} />

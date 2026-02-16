@@ -8,16 +8,33 @@ export interface WeatherConfig {
     longitude?: number;
 }
 
+// Effects quality levels
+export enum EffectsQuality {
+    CSS = 1,
+    Standard = 2,
+    High = 3,
+    Ultra = 4
+}
+
+export const QUALITY_LABELS: Record<EffectsQuality, string> = {
+    [EffectsQuality.CSS]: 'CSS',
+    [EffectsQuality.Standard]: 'Standard',
+    [EffectsQuality.High]: 'High',
+    [EffectsQuality.Ultra]: 'Ultra'
+};
+
 export interface AppConfig {
     stocks?: string[];
     weather?: WeatherConfig;
     crypto?: string[];
     interval?: number;
+    effectsQuality?: EffectsQuality;
 }
 
 const DEFAULT_STOCKS = ['NVDA', 'AAPL', 'GOOGL', 'MSFT', 'AVGO', 'AMD', 'QQQ', 'IREN', 'TSM'];
 const DEFAULT_CRYPTO = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XMR-USD'];
 const DEFAULT_INTERVAL = 30;
+const DEFAULT_EFFECTS_QUALITY = EffectsQuality.High;
 const DEFAULT_WEATHER = {
     city: "Hangzhou",
     latitude: 30.2748,
@@ -62,7 +79,8 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
                 stocks: DEFAULT_STOCKS,
                 weather: DEFAULT_WEATHER,
                 crypto: DEFAULT_CRYPTO,
-                interval: DEFAULT_INTERVAL
+                interval: DEFAULT_INTERVAL,
+                effectsQuality: DEFAULT_EFFECTS_QUALITY
             };
 
             try {
@@ -86,7 +104,8 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
             stocks: config.stocks,
             weather: config.weather,
             crypto: config.crypto,
-            interval: config.interval
+            interval: config.interval,
+            effectsQuality: config.effectsQuality ?? DEFAULT_EFFECTS_QUALITY
         };
     } catch (error) {
         onLog?.(`Config: Critical error loading config: ${error}`, 'error');
@@ -94,7 +113,8 @@ export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | '
             stocks: DEFAULT_STOCKS,
             weather: DEFAULT_WEATHER,
             crypto: DEFAULT_CRYPTO,
-            interval: DEFAULT_INTERVAL
+            interval: DEFAULT_INTERVAL,
+            effectsQuality: DEFAULT_EFFECTS_QUALITY
         };
     }
 };

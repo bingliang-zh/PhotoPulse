@@ -3,17 +3,60 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import styles from './Rain.module.css';
+import { EffectsQuality } from '../../services/config';
 
 type Props = {
   active: boolean;
   count?: number; 
   intensity?: 'moderate' | 'heavy';
+  quality?: EffectsQuality;
 };
+
+// Performance tier configurations
+const QUALITY_CONFIG = {
+  [EffectsQuality.CSS]: { // CSS only - no 3D
+    rainCount: 0,
+    windowDrops: 0,
+    useEnvMap: false,
+    material: 'basic',
+    dpr: 1,
+    geometryDetail: { cap: 2, radial: 4, sphere: 6 }
+  },
+  [EffectsQuality.Standard]: {
+    rainCount: 50,
+    windowDrops: 12,
+    useEnvMap: false,
+    material: 'standard',
+    dpr: 1,
+    geometryDetail: { cap: 3, radial: 6, sphere: 8 }
+  },
+  [EffectsQuality.High]: {
+    rainCount: 50,
+    windowDrops: 12,
+    useEnvMap: false,
+    material: 'physical',
+    dpr: 1,
+    geometryDetail: { cap: 4, radial: 8, sphere: 10 }
+  },
+  [EffectsQuality.Ultra]: {
+    rainCount: 50,
+    windowDrops: 12,
+    useEnvMap: true,
+    material: 'physical',
+    dpr: [1, 2] as [number, number],
+    geometryDetail: { cap: 4, radial: 8, sphere: 12 }
+  }
+} as const;
 
 /**
  * 3D Rain Scene using InstancedMesh for performance
  */
-const RainScene: React.FC<{ count: number; intensity: 'moderate' | 'heavy' }> = ({ count, intensity }) => {
+const RainScene: React.FC<{ 
+  count: number; 
+  intensity: 'moderate' | 'heavy';
+  materialType: 'basic' | 'standard' | 'physical';
+  geometryDetail: { cap: number; radial: number };
+}> = ({ count, intensity, materialType, geometryDetail }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   // Base constants
@@ -107,26 +150,44 @@ const RainScene: React.FC<{ count: number; intensity: 'moderate' | 'heavy' }> = 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
       {/* Capsule Geometry: radius, length, capSegments, radialSegments */}
-      <capsuleGeometry args={[0.08, 1, 4, 8]} />
+      <capsuleGeometry args={[0.08, 1, geometryDetail.cap, geometryDetail.radial]} />
       
-      {/* 
-        MeshPhysicalMaterial for Glass Effect 
-      */}
-      <meshPhysicalMaterial 
-        color="#ffffff" 
-        emissive="#ffffff"
-        emissiveIntensity={0.2}
-        transparent
-        opacity={0.9} 
-        roughness={0.1}
-        metalness={0.9} 
-        transmission={0.9} 
-        thickness={2.0} 
-        ior={1.5} 
-        clearcoat={1}
-        clearcoatRoughness={0.1}
-        envMapIntensity={2.0}
-      />
+      {/* Material based on quality setting */}
+      {materialType === 'basic' && (
+        <meshBasicMaterial
+          color="#a8d4ff"
+          transparent
+          opacity={0.6}
+        />
+      )}
+      {materialType === 'standard' && (
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#88ccff"
+          emissiveIntensity={0.1}
+          transparent
+          opacity={0.7}
+          roughness={0.3}
+          metalness={0.5}
+        />
+      )}
+      {materialType === 'physical' && (
+        <meshPhysicalMaterial 
+          color="#ffffff" 
+          emissive="#ffffff"
+          emissiveIntensity={0.2}
+          transparent
+          opacity={0.9} 
+          roughness={0.1}
+          metalness={0.9} 
+          transmission={0.9} 
+          thickness={2.0} 
+          ior={1.5} 
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+          envMapIntensity={2.0}
+        />
+      )}
     </instancedMesh>
   );
 };
@@ -134,7 +195,12 @@ const RainScene: React.FC<{ count: number; intensity: 'moderate' | 'heavy' }> = 
 /**
  * Static/Sliding drops on the "camera lens/window"
  */
-const WindowDrops: React.FC<{ count: number; intensity: 'moderate' | 'heavy' }> = ({ count, intensity }) => {
+const WindowDrops: React.FC<{ 
+  count: number; 
+  intensity: 'moderate' | 'heavy';
+  materialType: 'basic' | 'standard' | 'physical';
+  sphereDetail: number;
+}> = ({ count, intensity, materialType, sphereDetail }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   
@@ -213,45 +279,122 @@ const WindowDrops: React.FC<{ count: number; intensity: 'moderate' | 'heavy' }> 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
       {/* Sphere for droplets */}
-      <sphereGeometry args={[0.1, 12, 12]} />
-      <meshPhysicalMaterial 
-        color="#ffffff" 
-        transmission={1.0}
-        thickness={1.5}
-        roughness={0.0}
-        ior={1.33}
-        transparent
-        opacity={0.6} // High transparency
-        depthWrite={false} // Don't occlude rain behind it
-      />
+      <sphereGeometry args={[0.1, sphereDetail, sphereDetail]} />
+      {materialType === 'basic' && (
+        <meshBasicMaterial
+          color="#a8d4ff"
+          transparent
+          opacity={0.4}
+          depthWrite={false}
+        />
+      )}
+      {materialType === 'standard' && (
+        <meshStandardMaterial
+          color="#ffffff"
+          transparent
+          opacity={0.5}
+          roughness={0.2}
+          metalness={0.3}
+          depthWrite={false}
+        />
+      )}
+      {materialType === 'physical' && (
+        <meshPhysicalMaterial 
+          color="#ffffff" 
+          transmission={1.0}
+          thickness={1.5}
+          roughness={0.0}
+          ior={1.33}
+          transparent
+          opacity={0.6}
+          depthWrite={false}
+        />
+      )}
     </instancedMesh>
   );
 };
 
-export const Rain: React.FC<Props> = ({ active, count, intensity = 'moderate' }) => {
-  const effectiveCount = count || (intensity === 'heavy' ? 200 : 100);
-  const windowDropsCount = intensity === 'heavy' ? 40 : 20;
+/**
+ * CSS-only rain fallback for EffectsQuality.CSS
+ */
+const CSSRain: React.FC<{ intensity: 'moderate' | 'heavy' }> = ({ intensity }) => {
+  const dropCount = intensity === 'heavy' ? 60 : 40;
+  
+  return (
+    <div className={styles.cssRainContainer}>
+      {Array.from({ length: dropCount }, (_, i) => (
+        <div
+          key={i}
+          className={styles.cssRainDrop}
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 2}s`,
+            animationDuration: `${0.5 + Math.random() * 0.3}s`,
+            opacity: 0.3 + Math.random() * 0.4
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+export const Rain: React.FC<Props> = ({ active, count, intensity = 'moderate', quality = EffectsQuality.Standard }) => {
+  const config = QUALITY_CONFIG[quality];
+  
+  // Base counts from config, adjusted for intensity
+  const intensityMultiplier = intensity === 'heavy' ? 2 : 1;
+  const effectiveCount = count || (config.rainCount * intensityMultiplier);
+  const windowDropsCount = config.windowDrops * intensityMultiplier;
+
+  // Don't render Canvas when not active to save GPU/CPU resources
+  if (!active) {
+    return null;
+  }
+
+  // Quality CSS: CSS-only fallback
+  if (quality === EffectsQuality.CSS) {
+    return (
+      <div 
+        className={`${styles.container} ${styles.active}`}
+        aria-hidden="true"
+      >
+        <CSSRain intensity={intensity} />
+      </div>
+    );
+  }
 
   return (
     <div 
-      className={`${styles.container} ${active ? styles.active : ''}`}
+      className={`${styles.container} ${styles.active}`}
       aria-hidden="true"
     >
       {/* R3F Canvas */}
       <Canvas 
         camera={{ position: [0, 0, 20], fov: 60 }}
-        gl={{ alpha: true, antialias: true }}
-        dpr={[1, 2]} // Support high DPI
-        style={{ pointerEvents: 'none', background: 'transparent' }} 
+        gl={{ alpha: true, antialias: quality >= EffectsQuality.Ultra }}
+        dpr={config.dpr}
+        style={{ pointerEvents: 'none', background: 'transparent' }}
       >
         <ambientLight intensity={2} />
         <directionalLight position={[10, 10, 5]} intensity={5} color="#ffffff" />
         
-        {/* Environment is critical for glass reflections - user won't see this map but the drops will reflect it */}
-        <Environment preset="city" /> 
+        {/* Environment map only for Ultra quality */}
+        {config.useEnvMap && <Environment preset="city" />}
 
-        <RainScene count={effectiveCount} intensity={intensity} />
-        <WindowDrops count={windowDropsCount} intensity={intensity} />
+        <RainScene 
+          count={effectiveCount} 
+          intensity={intensity}
+          materialType={config.material}
+          geometryDetail={config.geometryDetail}
+        />
+        {windowDropsCount > 0 && (
+          <WindowDrops 
+            count={windowDropsCount} 
+            intensity={intensity}
+            materialType={config.material}
+            sphereDetail={config.geometryDetail.sphere}
+          />
+        )}
       </Canvas>
     </div>
   );

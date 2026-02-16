@@ -22,3 +22,29 @@
   visibility: visible;
   z-index: 100;
 }
+
+/* CSS-only rain fallback for quality=1 */
+.cssRainContainer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cssRainDrop {
+  position: absolute;
+  top: -20px;
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(to bottom, transparent, rgba(174, 194, 224, 0.5), rgba(174, 194, 224, 0.8));
+  border-radius: 0 0 2px 2px;
+  animation: cssRainFall linear infinite;
+}
+
+@keyframes cssRainFall {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(100vh + 40px));
+  }
+}
