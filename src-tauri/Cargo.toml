@@ -1,6 +1,6 @@
 [package]
 name = "photopulse"
-version = "0.2.0"
+version = "0.2.1"
 description = "Repurpose your idle devices into a smart photo frame"
 authors = ["bingliang-zh"]
 edition = "2021"
