@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { openFolderWithLogs, checkWebGLSupport } from '../utils/system';
 import { EffectsQuality, QUALITY_LABELS } from '../services/config';
 
-export const APP_VERSION = "0.2.0"; // From package.json
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION;
 
 export interface LogEntry {
     message: string;
