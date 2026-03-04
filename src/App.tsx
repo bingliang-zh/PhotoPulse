@@ -20,6 +20,42 @@ function App() {
   const [showBackground, setShowBackground] = useState(true);
   const [effectsQuality, setEffectsQuality] = useState<EffectsQuality>(EffectsQuality.Standard);
 
+  const saveConfigDebounced = useCallback((newConfig: AppConfig) => {
+    const timer = setTimeout(async () => {
+      const { saveConfig } = await import('./services/config');
+      await saveConfig(newConfig, addLog);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [addLog]);
+
+  useEffect(() => {
+    if (config && config.effectsQuality !== effectsQuality) {
+      const updatedConfig = { ...config, effectsQuality };
+      const cleanup = saveConfigDebounced(updatedConfig);
+      setConfig(updatedConfig);
+      return cleanup;
+    }
+  }, [effectsQuality, config, saveConfigDebounced]);
+
+  // Long press logic (5 seconds)
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleTouchStart = useCallback(() => {
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+    touchTimerRef.current = setTimeout(() => {
+      setDebugVisible(prev => !prev);
+      addLog('Long press (5s) detected, toggling Debug Panel', 'info');
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(100);
+      touchTimerRef.current = null;
+    }, 5000);
+  }, [addLog]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchTimerRef.current) {
+      clearTimeout(touchTimerRef.current);
+      touchTimerRef.current = null;
+    }
+  }, []);
+
   // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
   const testWeatherCodes = [0, 3, 45, 61, 95, 73];
   const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'thunder', 'snow'];
@@ -90,7 +126,14 @@ function App() {
   if (!config) return null; // Or a loading spinner // You can customize settings in config.json
 
   return (
-    <div className="container">
+    <div 
+      className="container"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchEnd}
+      onMouseDown={handleTouchStart}
+      onMouseUp={handleTouchEnd}
+    >
       {showBackground && (
         <Carousel
           interval={config.interval}
