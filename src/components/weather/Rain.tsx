@@ -93,6 +93,7 @@ const RainGPU: React.FC<{ count: number; intensity: 'moderate' | 'heavy' }> = ({
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
+      materialRef.current.uniforms.uWindX.value = windX;
     }
   });
 
