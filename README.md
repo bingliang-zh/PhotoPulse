@@ -101,6 +101,12 @@ This project uses **Tauri v2** + **Vite** + **React**. We use **pnpm** as the pa
 pnpm install
 ```
 
+### Development Guidelines
+
+1.  **Strict Local Verification**: Always run `pnpm tsc --noEmit` and/or `pnpm build` locally before pushing or creating a Pull Request.
+2.  **Branching**: Use `riko/` prefix for all personal feature branches.
+3.  **PR Flow**: Internal PRs should point from the bot's branch to the organization's main branch, then to the user's main branch for deployment.
+
 ### Running
 
 ```bash
