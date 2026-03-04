@@ -41,6 +41,17 @@ const DEFAULT_WEATHER = {
     longitude: 120.1551
 };
 
+export const saveConfig = async (config: AppConfig, onLog?: (msg: string, type: 'info' | 'warn' | 'error' | 'debug') => void): Promise<boolean> => {
+    try {
+        await writeTextFile('config.json', JSON.stringify(config, null, 2), { baseDir: BaseDirectory.AppData });
+        onLog?.("Config: Configuration saved successfully.", 'info');
+        return true;
+    } catch (e) {
+        onLog?.(`Config: Failed to save config: ${e}`, 'error');
+        return false;
+    }
+};
+
 export const loadConfig = async (onLog?: (msg: string, type: 'info' | 'warn' | 'error' | 'debug', action?: { label: string, handler: () => void }) => void): Promise<AppConfig> => {
     let appDataPath = "unknown";
 
