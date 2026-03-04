@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 import { Carousel } from './components/Carousel';
 import { Weather } from './components/Weather';
@@ -19,6 +19,10 @@ function App() {
   const [testMode, setTestMode] = useState(false);
   const [showBackground, setShowBackground] = useState(true);
   const [effectsQuality, setEffectsQuality] = useState<EffectsQuality>(EffectsQuality.Standard);
+
+  const addLog: OnLogCallback = useCallback((message, type, action) => {
+    setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);
+  }, []);
 
   const saveConfigDebounced = useCallback((newConfig: AppConfig) => {
     const timer = setTimeout(async () => {
@@ -59,10 +63,6 @@ function App() {
   // Test weather codes: clear(0), cloudy(3), fog(45), rain(61), thunder(95), snow(73)
   const testWeatherCodes = [0, 3, 45, 61, 95, 73];
   const testWeatherNames = ['clear', 'cloudy', 'fog', 'rain', 'thunder', 'snow'];
-
-  const addLog: OnLogCallback = useCallback((message, type, action) => {
-    setLogs(prev => [...prev, { message, type, action, timestamp: new Date().toLocaleTimeString() }]);
-  }, []);
 
   const nextWeather = useCallback(() => {
     if (!testMode) return;
