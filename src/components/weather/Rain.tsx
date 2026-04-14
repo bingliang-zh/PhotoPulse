@@ -11,6 +11,16 @@ type Props = {
   quality?: EffectsQuality;
 };
 
+// ---- Static CSS rain layer (no WebGL, no animation, no JS at runtime) ----
+// Used when quality === EffectsQuality.CSS for maximum power savings.
+// Renders a single div with a repeating-linear-gradient background — truly zero frames.
+const RainCSS: React.FC<{ intensity: 'moderate' | 'heavy' }> = ({ intensity }) => (
+  <div
+    className={`${styles.staticRainLayer} ${intensity === 'heavy' ? styles.staticRainLayerHeavy : ''}`}
+    aria-hidden="true"
+  />
+);
+
 // Shader for GPU-based rain movement
 const RainMaterial = {
   uniforms: {
@@ -114,14 +124,18 @@ const RainGPU: React.FC<{ count: number; intensity: 'moderate' | 'heavy' }> = ({
   );
 };
 
-export const Rain: React.FC<Props> = ({ active, count = 100, intensity = 'moderate' }) => {
-  if (!active) return null;
-
+export const Rain: React.FC<Props> = ({ active, count = 100, intensity = 'moderate', quality = EffectsQuality.Standard }) => {
   return (
-    <div className={`${styles.container} ${styles.active}`}>
-      <Canvas camera={{ position: [0, 0, 20], fov: 60 }} gl={{ alpha: true, antialias: false }}>
-        <RainGPU count={count} intensity={intensity} />
-      </Canvas>
+    <div className={`${styles.container} ${active ? styles.active : ''}`}>
+      {active && quality === EffectsQuality.CSS ? (
+        // CSS-only path: no WebGL, no JS animation frame — maximum power savings
+        <RainCSS intensity={intensity} />
+      ) : active ? (
+        // WebGL GPU path for Standard / High / Ultra
+        <Canvas camera={{ position: [0, 0, 20], fov: 60 }} gl={{ alpha: true, antialias: false }}>
+          <RainGPU count={count} intensity={intensity} />
+        </Canvas>
+      ) : null}
     </div>
   );
 };

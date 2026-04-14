@@ -41,7 +41,12 @@ export function WeatherEffects({ weatherCode, onLog, effectsQuality = EffectsQua
   }, [mode, onLog]);
 
   return (
-    <div className={`weather-effects weather-${mode}`} aria-hidden data-weather-effect={mode}>
+    <div
+      className={`weather-effects weather-${mode}`}
+      aria-hidden
+      data-weather-effect={mode}
+      data-static-effects={effectsQuality === EffectsQuality.CSS ? '' : undefined}
+    >
       {/* 
           All Weather Components are fully isolated CSS Modules.
           They receive an 'active' prop to handle their own transitions.
