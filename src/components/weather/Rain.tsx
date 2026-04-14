@@ -11,42 +11,15 @@ type Props = {
   quality?: EffectsQuality;
 };
 
-// ---- CSS-only rain (no WebGL / no JS animation frame) ----
+// ---- Static CSS rain layer (no WebGL, no animation, no JS at runtime) ----
 // Used when quality === EffectsQuality.CSS for maximum power savings.
-const CSS_DROP_COUNT = 30;
-
-const RainCSS: React.FC<{ intensity: 'moderate' | 'heavy' }> = ({ intensity }) => {
-  // Generate stable drop positions/durations once (no re-renders needed).
-  const drops = useMemo(() => {
-    return Array.from({ length: CSS_DROP_COUNT }, (_, i) => {
-      const seed = (i * 137.508) % 100; // deterministic pseudo-random
-      const left = (seed * 1.0) % 100;
-      const duration = intensity === 'heavy' ? 0.4 + (seed % 30) / 100 : 0.7 + (seed % 50) / 100;
-      const delay = -(seed % 100) / 100 * duration * 2;
-      const height = intensity === 'heavy' ? 22 + (seed % 10) : 15 + (seed % 8);
-      const tilt = intensity === 'heavy' ? `rotate(${10 + (seed % 10)}deg)` : `rotate(${2 + (seed % 5)}deg)`;
-      return { left, duration, delay, height, tilt };
-    });
-  }, [intensity]);
-
-  return (
-    <div className={styles.cssRainContainer}>
-      {drops.map((d, i) => (
-        <div
-          key={i}
-          className={styles.cssRainDrop}
-          style={{
-            left: `${d.left}%`,
-            height: `${d.height}px`,
-            animationDuration: `${d.duration}s`,
-            animationDelay: `${d.delay}s`,
-            transform: d.tilt,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+// Renders a single div with a repeating-linear-gradient background — truly zero frames.
+const RainCSS: React.FC<{ intensity: 'moderate' | 'heavy' }> = ({ intensity }) => (
+  <div
+    className={`${styles.staticRainLayer} ${intensity === 'heavy' ? styles.staticRainLayerHeavy : ''}`}
+    aria-hidden="true"
+  />
+);
 
 // Shader for GPU-based rain movement
 const RainMaterial = {

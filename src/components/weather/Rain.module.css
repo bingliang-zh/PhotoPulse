@@ -48,3 +48,29 @@
     transform: translateY(calc(100vh + 40px));
   }
 }
+
+/* Static rain layer for quality=CSS (lowest power) — zero animation, zero JS */
+.staticRainLayer {
+  position: absolute;
+  inset: 0;
+  /* Repeating diagonal lines to simulate rain streaks */
+  background-image: repeating-linear-gradient(
+    170deg,
+    transparent 0px,
+    transparent 6px,
+    rgba(174, 194, 224, 0.18) 6px,
+    rgba(174, 194, 224, 0.18) 7px
+  );
+  background-size: 60px 60px;
+}
+
+.staticRainLayerHeavy {
+  background-image: repeating-linear-gradient(
+    165deg,
+    transparent 0px,
+    transparent 4px,
+    rgba(174, 194, 224, 0.22) 4px,
+    rgba(174, 194, 224, 0.22) 5px
+  );
+  background-size: 40px 40px;
+}
