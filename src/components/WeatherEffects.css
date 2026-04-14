@@ -13,3 +13,11 @@
   z-index: 1;
   overflow: hidden;
 }
+
+/* quality=CSS (lowest power): freeze all animations inside the effects container.
+   CSS transitions (fade in/out) are preserved — only keyframe animations are killed. */
+[data-static-effects] *,
+[data-static-effects] *::before,
+[data-static-effects] *::after {
+  animation: none !important;
+}
